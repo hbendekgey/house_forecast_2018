@@ -1,0 +1,90 @@
+start_date,end_date,year,pollster,population,sample_size,method,dem,rep,dem_lean,rep_lean,nat_vote_dem,nat_vote_rep
+7-May,12-May,1958,Gallup,RV,1636,PI,52,35,4,3,56,43.6
+28-May,2-Jun,1958,Gallup,RV,1500,PI,49,34,3,4,56,43.6
+2-May,7-May,1954,Gallup,RV,1500,PI,49,35,5,4,52.5,47
+21-May,26-May,1954,Gallup,RV,1416,PI,46,37,6,3,52.5,47
+12-Jun,17-Jun,1954,Gallup,RV,1435,PI,48,36,4,4,52.5,47
+4-Jun,9-Jun,1950,Gallup,RV,1357,PI,46,38,5,4,49.6,48.9
+29-Jun,4-Jul,1950,Gallup,RV,1363,PI,49,30,7,4,49.6,48.9
+5-May,10-May,1966,Gallup,RV,1563,PI,47,30,6,4,50.9,48.2
+19-May,24-May,1966,Gallup,RV,1523,PI,51,30,5,4,50.9,48.2
+16-Jun,21-Jun,1966,Gallup,RV,1562,PI,46,36,3,5,50.9,48.2
+8-Jul,13-Jul,1966,Gallup,RV,1541,PI,49,29,6,4,50.9,48.2
+29-Jul,3-Aug,1966,Gallup,RV,1503,PI,55,31,4,2,50.9,48.2
+31-May,5-Jun,1962,Gallup,RV,1512,PI,51,34,4,3,52.4,47.1
+28-Jun,3-Jul,1962,Gallup,RV,1527,PI,56,32,4,3,52.4,47.1
+21-May,26-May,1970,Gallup,RV,1509,PI,45,32,7,5,53.6,44.9
+4-Jun,9-Jun,1970,Gallup,RV,1525,PI,46,33,6,3,53.6,44.9
+18-Jun,23-Jun,1970,Gallup,RV,1513,PI,47,34,5,4,53.6,44.9
+10-May,13-May,1974,Gallup,RV,1543,PI,52,24,6,3,57.5,40.7
+31-May,3-Jun,1974,Gallup,RV,1509,PI,49,23,7,3,57.5,40.7
+19-May,22-May,1978,Gallup,RV,1508,PI,49,27,,,53.7,44.8
+30-May,5-Jun,1978,Time,RV,1022,TI,37,23,,,53.7,44.8
+2-Jun,5-Jun,1978,Gallup,RV,1503,PI,47,24,,,53.7,44.8
+16-Jun,19-Jun,1978,Gallup,RV,1505,PI,49,29,,,53.7,44.8
+7-Jul,10-Jul,1978,Gallup,RV,1555,PI,53,27,,,53.7,44.8
+10-May,11-May,1982,NBC,RV,1599,TI,48,40,,,55.2,43.4
+14-May,17-May,1982,Gallup,RV,1555,PI,50,29,,,55.2,43.4
+8-Jun,10-Jun,1982,Time,RV,1010,TI,43,35,,,55.2,43.4
+11-Jun,14-Jun,1982,Gallup,RV,1504,PI,48,33,,,55.2,43.4
+25-Jun,28-Jun,1982,Gallup,RV,1531,PI,49,30,,,55.2,43.4
+9-Jun,16-Jun,1986,Gallup,RV,1004,TI,44,39,,,54.3,44.4
+18-May,22-May,1990,NBC,RV,1007,TI,33,34,,,52.1,44.3
+6-Jul,10-Jul,1990,NBC,RV,1555,TI,36,33,,,52.1,44.3
+2-Jun,2-Jun,1994,Time/CNN,RV,600,TI,40,37,,,44.8,51.9
+10-Jun,14-Jun,1994,NBC,RV,1502,TI,35,30,,,44.8,51.9
+11-Jun,12-Jun,1994,Gallup/CNN/USA Today,RV,756,TI,47,39,3,3,44.8,51.9
+25-Jun,28-Jun,1994,US News & World Report,RV,1000,TI,31,28,,,44.8,51.9
+8-May,10-May,1998,Gallup/CNN/USA Today,RV,1005,TI,43,38,6,4,47.3,48.4
+18-May,19-May,1998,Time/CNN,RV,1234,TI,42,39,3,4,47.3,48.4
+1-Jun,7-Jun,1998,American Viewpoint National Monitor Survey,RV,1000,TI,37,34,,,47.3,48.4
+4-Jun,8-Jun,1998,Pew,RV,1012,TI,40,37,6,7,47.3,48.4
+30-Jun,1-Jul,1998,Time/CNN,RV,1024,TI,41,36,4,4,47.3,48.4
+7-Jul,8-Jul,1998,Gallup,RV,1035,TI,40,36,6,4,47.3,48.4
+15-May,16-May,2002,Democracy Corps,LV,1000,TI,40,39,6,5,45.2,50
+22-May,23-May,2002,Time/CNN,RV,1007,TI,43,38,5,6,45.2,50
+28-May,29-May,2002,Gallup/CNN/USA Today,RV,1003,TI,44,45,,,45.2,50
+9-Jun,11-Jun,2002,Battleground,LV,1000,TI,38,34,6,5,45.2,50
+18-Jun,24-Jun,2002,Democracy Corps,LV,1000,TI,40,38,5,5,45.2,50
+19-Jun,20-Jun,2002,Time/CNN/Harris,RV,1003,TI,40,49,,,45.2,50
+19-Jun,23-Jun,2002,Pew,RV,1212,TI,46,44,,,45.2,50
+21-Jun,23-Jun,2002,Gallup/CNN/USA Today,RV,1020,TI,45,37,3,3,45.2,50
+28-Jun,30-Jun,2002,Gallup/CNN/USA Today,RV,1019,TI,41,43,3,3,45.2,50
+11-May,12-May,2006,Princeton/Newsweek,RV,1007,TI,44,33,6,6,52.3,44.3
+18-May,24-May,2006,Democracy Corps,LV,1200,TI,48,38,3,3,52.3,44.3
+1-Jun,4-Jun,2006,Gallup,RV,1002,TI,46,37,5,3,52.3,44.3
+8-Jun,11-Jun,2006,CNN,RV,1031,TI,45,30,3,5,52.3,44.3
+9-Jun,11-Jun,2006,Gallup/USA Today,RV,1002,TI,50,35,2,3,52.3,44.3
+14-Jun,19-Jun,2006,Pew,RV,1501,TI,45,31,6,8,52.3,44.3
+14-Jun,15-Jun,2006,CNN,RV,1017,TI,44,36,,,52.3,44.3
+23-Jun,25-Jun,2006,Gallup/USA Today,RV,1000,TI,51,34,4,2,52.3,44.3
+24-Jun,27-Jun,2006,LA Times,RV,1321,TI,49,25,,,52.3,44.3
+25-Jun,29-Jun,2006,Democracy Corps,LV,1000,TI,48,40,3,2,52.3,44.3
+6-Jul,9-Jul,2006,Gallup,RV,1007,TI,49,39,,,52.3,44.3
+6-May,9-May,2010,Ipsos,RV,905,,45,42,,,44.9,51.7
+10-May,16-May,2010,Rasmussen,LV,3500,,38,43,,,44.9,51.7
+10-May,16-May,2010,Gallup,RV,1600,,45,46,,,44.9,51.7
+15-May,18-May,2010,Democracy Corps,LV,1000,,43,46,,,44.9,51.7
+18-May,19-May,2010,Fox,RV,900,,41,41,,,44.9,51.7
+17-May,23-May,2010,Gallup,RV,1600,,47,46,,,44.9,51.7
+17-May,23-May,2010,Rasmussen,LV,3500,,36,44,,,44.9,51.7
+19-May,24-May,2010,Quinnipiac,RV,1914,,42,36,,,44.9,51.7
+24-May,30-May,2010,Rasmussen,LV,3500,,37,44,,,44.9,51.7
+24-May,30-May,2010,Gallup,RV,1600,,43,49,,,44.9,51.7
+31-May,6-Jun,2010,Rasmussen,LV,3500,,35,44,,,44.9,51.7
+31-May,6-Jun,2010,Gallup,RV,1600,,46,46,,,44.9,51.7
+3-Jun,6-Jun,2010,ABC/Wash Post,RV,,,47,44,,,44.9,51.7
+4-Jun,7-Jun,2010,PPP,RV,650,,43,41,,,44.9,51.7
+8-Jun,9-Jun,2010,Fox,RV,900,,41,38,,,44.9,51.7
+7-Jun,13-Jun,2010,Rasmussen,LV,3500,,36,46,,,44.9,51.7
+7-Jun,13-Jun,2010,Gallup,RV,1600,,44,49,,,44.9,51.7
+10-Jun,13-Jun,2010,Ipsos,RV,846,,42,43,,,44.9,51.7
+11-Jun,13-Jun,2010,Gallup/USA Today,RV,1014,,48,43,,,44.9,51.7
+14-Jun,20-Jun,2010,Rasmussen,LV,3500,,36,44,,,44.9,51.7
+14-Jun,20-Jun,2010,Gallup,RV,1600,,46,46,,,44.9,51.7
+16-Jun,20-Jun,2010,Pew,RV,1496,,45,45,,,44.9,51.7
+21-Jun,27-Jun,2010,Gallup,RV,1600,,46,45,,,44.9,51.7
+19-Jun,22-Jun,2010,Democracy Corps,LV,867,,42,48,,,44.9,51.7
+21-Jun,27-Jun,2010,Rasmussen,LV,3500,,38,44,,,44.9,51.7
+29-Jun,30-Jun,2010,Fox,RV,900,,40,42,,,44.9,51.7
+28-Jun,3-Jul,2010,Gallup,RV,1600,,44,46,,,44.9,51.7

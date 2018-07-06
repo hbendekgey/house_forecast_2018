@@ -1,0 +1,589 @@
+\documentclass{article}
+    \usepackage{fullpage}
+    \title{House Forecast Model}
+    \author{Harry Bendekgey}
+    \date{July 6, 2018}
+    
+\begin{document}
+\maketitle
+
+<<imports, include=FALSE>>=
+knitr::opts_chunk$set(message=FALSE, warning=FALSE, fig.height=5, fig.width=10, fig.align = "center")
+library(dplyr)
+library(readr)
+library(ggplot2)
+library(gtools)
+library(rstan)
+library(bayesplot)
+options(digits=4)
+@
+
+\section*{Introduction}
+
+Bafumi, Erikson, and Wlezien propose a model for forecasting US house midterm elections based on data available by early July. They content that forecasts are primarily useful when submitted long enough in advance that stakeholders can respond appropriately. 
+
+In this report I will recreate their methodology to predict the results of the 2018 midterm elections in the house of representatives. My goal is not only to produce forecasts but to bring attention to weak points in the methodology and where different choices can be made which would yield different results than the ones I obtained. 
+
+\section*{Estimating National Vote}
+
+The first step in Bafumi et al's model is to predict the national house vote for the upcoming midterm election. This is done using only two predictor variables: the party of the current president, and the average Demcoratic share of generic ballot results between 180 and 121 days before the election. 
+
+Both national vote and generic ballot averages are measured in percentage point deviations from an even split; that is, a national vote of ``10" corresponds to the Democrats winning 60\% of voters who voted for either Democrats or Republican. 
+
+Bafumi et al did not include their data, so even this gets a bit fuzzy. For example, they propose decrementing the results of registered voter polls by 1.42 so that they reflect likely voter populations. Extensive research has been done on the difference between thse two polls, and the 1.42 value seems roughly consistent with what others have found; Fivethirtyeight decrements the margin by 2.7 points, roughly equivalent to a 1.35 decrement in Democratic share. Bafumi et al's model only talks about share of two-party vote, thus ignoring undecided respondents, while Fivethirtyeight measures poll results in the margin between Democratic and Republican respondents, meaning Fivethirtyeight's adjustment should be smaller than Bafumi et al's, proportional to the number of undecided voters encountered. 
+
+The main problem with this adjustment is that they are regressing on data that goes back as far as 1946. The first likely voter polls appeared in 2002. Thus we are adjusting every twentieth century poll, when we don't even have likely voter polls to compare to. Bafumi et al. come to this value by regressing the vote on the different categories of polls, but then use their result as if it had no uncertainty attached to it, and don't consider the possibility that it has changed over time. 
+
+It is particularly concerning that we are regressing on generic ballot averages across this time period, where in early years this corresponds to a single poll and in recent years corresponds to a huge body of work conducted over the 60 day period. The variability of this predictor should therefore be going down across elections and thus the variability of the response. 
+
+Another question arises from polls that ask for party preference, and if no preference is given, ask for the lean of the respondent. If ``lean Democratic" and ``lean Republican" ae included in the totals for these polls. The results change. I did not include these in my model. To recreate their regression, I will use the value anyways, using elections from 1956-2010: 
+<<model validation, include=FALSE>>=
+# Uncomment the three lines below if you want to 
+
+seatchange <- read_csv("data/seatchange.csv")
+
+genpolls <- read_csv("data/genpollsmayjune.csv") 
+#genpolls$rep_lean[is.na(genpolls$rep_lean)] = 0
+#genpolls$dem_lean[is.na(genpolls$dem_lean)] = 0
+
+model <- genpolls %>%
+#  mutate(dem = dem + dem_lean, rep = rep + rep_lean) %>%
+  mutate(dem_share_poll = 100 * (dem/(dem+rep) - .0142 * (population == "RV")) - 50) %>%
+  mutate(dem_share = 100 * nat_vote_dem/(nat_vote_dem + nat_vote_rep) - 50) %>%
+  group_by(year) %>%
+  summarise(genpoll = mean(dem_share_poll), vote = dem_share[1]) %>%
+  merge(seatchange, by="year") %>%
+  mutate(president_party = -1 * midterm) %>%
+  select(year, genpoll, vote, president_party)
+
+fit <- lm(vote ~ genpoll + president_party, data=model)
+@
+
+<<reg fit>>=
+summary(fit)
+@
+
+In their 2014 paper, Bafumi et al propose the regression model:
+$$\textnormal{National Vote \%}=-0.14 + 0.53\textnormal{Generic Poll \%} -2.04 \textnormal{PresidentialParty} + e_j$$
+My model claims:
+$$\textnormal{National Vote \%}=-0.40 + 0.45\textnormal{Generic Poll \%} -2.08 \textnormal{PresidentialParty} + e_j$$
+
+Thus it's worth noting that my model is always going to give a smaller result than Bafumi et al's, making my results systematically pro-Republican compared to theirs. 
+
+Now I include 2014 data in the regression 
+
+<<updated regression>>=
+#TODO
+@
+
+
+Now let's run this model on data from 2018 to predict the national vote. First, we find the general congressional ballot
+
+<<2018 generic ballot>>=
+#TODO for now I'm just saying the ballot average is 56% dem. 
+params18 <- data.frame(genpoll=6, president_party=-1)
+@
+
+With this average, we create a prediction interval for 2018's democratic national vote share:
+
+<<prediction interval>>=
+interval <- predict.lm(fit, params18, interval = "prediction")
+interval
+-0.14 + 0.53 * 6 +2.04 #Bafumi et al point estimate
+@
+
+Thus I predict that Democrats will win 54.39\% of the popular vote, compared to Bafumi et al's prediction of 55.08\%. I will continue to use my estimates firstly because I have all the data for it and stand by my methodology, and secondly because I need to know the uncertainty attached to this estimate, something Bafumi et al do not give access to. 
+
+<<standard error, include=FALSE>>=
+qt(0.975, df=13) # t-cutoff of 2.16
+c((4.386-0.1905)/2.16,(8.581-4.386)/2.16) #SE for t-distribution is 1.942
+@
+
+Mathematically, I am saying that the democratic share of the two-party vote, measured in percentage points away from 50, is distributed t(4.386, 1.942, df=13). This gives us our prediction interval that we are 95\% confident the value will be between 0.19 and 8.58. This means I am all but certain the Democrats will win the national house vote. 
+
+The 2016 popular vote was:
+
+<<>>=
+49.441-50
+@
+
+Thus if we measure 2016-2018 national vote swing, we get points estimate and prediction interval:
+<<>>=
+interval - (49.441-50)
+@
+
+<<swing params, include=FALSE>>=
+expswing <- 4.945
+sdswing <- 1.942
+dfswing <- 13
+@
+
+Mathematically, we say taht the swing in national democratic share of two-party vote is distributed t(4.945, 1.942, df=13) with the prediction interval shown above.
+
+\section*{Mean District Swing}
+
+An important question to address at this point is why we care about the national vote. In order to model the covariance of house races, Bafumi et al simulate the election by first picking a value for the national swing from the distribution found above. Then, they define district-by-district predictions such that the mean district is shifted from the previous election results by that national swing. Then each district's uncertainty is simulated. This is done repeatedly, simulating thousands of elections. The proportion of these elections in which a certain event occurs is taken to be the probability of that event occuring.
+
+They key fact here is that the parameter of interest is not the swing of national vote from 2016-2018, but the swing of mean district vote in contested districts. The national vote and the mean contested district vote differ in two important ways.
+
+The first way is outlined in Bafumi et al's 2014 paper. If there is a negative correlation between percentage democratic vote in a district and the total number of people that vote, we would expect that summing all the votes in those districts and calculating percentage democratic vote would look worse for democrats than just taking the mean democratic share across those districts, because the latter weighs all districts evenly. 
+
+Because we are only interested in mean district vote swing, we don't necessarily care about the size of this discrepency. We only care if we are reason to believe its size will change election-to-election. Bafumi et al argue that it does, that in midterm election years Democrats are particularly bad at turnout and the Democratic mean district advantage grows in size. To estimate this value, they use a single data point: 2008-2010, and use that to value in their prediction for 2012-2014. 
+
+They estimate this discrepency by comparing the mean Democratic district share in 2008 to the share of total votes in those districts, and then doing the same for 2010 to show that the discrepency grew. This is concerning, however, because they find the change in discrepency size for a single transition between elections, and use that value without any uncertainty attached to it. Let's try to recreate what they did:
+
+<<helper functions, include=FALSE>>=
+getparty <- function(parties) {
+  if ("Democratic" %in% parties & "Republican" %in% parties) {
+    stop("both??")
+  } else if ("Democratic" %in% parties | 
+             "Democratic-Farmer-Labor" %in% parties | 
+             "Democratic-Farmer Labor" %in% parties) {
+    return("Democratic")
+  } else if ("Republican" %in% parties) {
+    return("Republican")
+  } else {
+    return(parties[1])
+  }
+}
+
+getincumbent <- function(district, parties, incums) {
+  inc <- parties[incums]
+  if (length(inc) > 1) {
+    print(district[1])
+    inc = inc[1];
+  }
+  if (identical(character(0), inc)) {
+    return(0)
+  } else if (inc == "Republican" | inc == "republican") {
+    return(-1)
+  } else if (inc=="Democratic" | inc == "democrat") {
+    return(1)
+  } else {
+    print("Unusual:")
+    print(inc)
+    return(0)
+  }
+}
+@
+
+<<2016 house, include=FALSE>>=
+house16 <- read_csv("~/election_2016_data/data/house_general_election_2016.csv") %>%
+  mutate(district = paste(state, geo_name, sep=" "))
+
+share16 <- house16 %>%
+  group_by(district) %>%
+  summarise(rep_vote = sum((individual_party == "republican")* vote_pct),
+            dem_vote = sum((individual_party == "democrat")* vote_pct)) %>% 
+  filter(rep_vote > 0, dem_vote > 0) %>%
+  mutate(dem_share = dem_vote / (dem_vote + rep_vote) * 100 - 50)
+
+mdist16 <- mean(share16$dem_share) # mean district vote
+
+total16 <- house16 %>% 
+  filter(district %in% share16$district) %>%
+  group_by(individual_party) %>%
+  summarise(votes = sum(votes))
+sumcont16 <- total16$votes[1]/(total16$votes[1] + total16$votes[3]) * 100 - 50
+mdist16
+sumcont16
+@
+
+<<2014 house, include=FALSE>>=
+house14 <- read_csv("~/fec-election-results/fec_tidy.csv") %>% 
+  filter(chamber == "H", year==2014, election=="general") %>%
+  filter(state %in% state.abb) %>%
+  mutate(district = paste(state, district, sep=" ")) %>%
+  group_by(name) %>%
+  summarise(district = district[1], party =getparty(party), 
+            vote=sum(vote), pct=sum(pct), incumbent=incumbent[1])
+# this is to deal with certain candidates listed under multiple parties
+
+share14 <- house14 %>%
+  filter(!is.na(party)) %>%
+  group_by(district) %>%
+  summarise(rep_vote = sum((party == "Republican")* vote),
+            dem_vote = sum((party == "Democratic")* vote),
+            inc = getincumbent(district, party, incumbent)) %>% 
+  filter(rep_vote > 0, dem_vote > 0) %>%
+  mutate(dem_share = dem_vote / (dem_vote + rep_vote) * 100 - 50)
+
+mdist14 <- mean(share14$dem_share) # mean district vote
+
+total14 <- house14 %>% 
+  filter(district %in% share14$district) %>%
+  group_by(party) %>%
+  summarise(votes = sum(vote)) %>% 
+  filter(party == "Democratic" | party == "Republican")
+
+sumcont14 <- total14$votes[1]/(total14$votes[1]+total14$votes[2]) * 100 - 50
+@
+
+<<2012 house, include=FALSE>>=
+house12 <- read_csv("~/fec-election-results/fec_tidy.csv") %>% 
+  filter(chamber == "H", year==2012, election=="general") %>%
+  filter(state %in% state.abb) %>%
+  mutate(district = paste(state, district, sep=" ")) %>%
+  group_by(name) %>%
+  summarise(district = district[1], party =getparty(party), 
+            vote=sum(vote), pct=sum(pct), incumbent=incumbent[1])
+# again, this is to deal with certain candidates listed under multiple parties
+
+share12 <- house12 %>%
+  filter(!is.na(party)) %>%
+  group_by(district) %>%
+  summarise(rep_vote = sum((party == "Republican")* vote),
+            dem_vote = sum((party == "Democratic")* vote),
+            incumbent = getincumbent(district, party, incumbent)) %>% 
+  filter(rep_vote > 0, dem_vote > 0) %>%
+  mutate(dem_share = dem_vote / (dem_vote + rep_vote) * 100 - 50)
+
+mdist12 <- mean(share12$dem_share) # mean district vote
+
+total12 <- house12 %>% 
+  filter(district %in% share12$district) %>%
+  group_by(party) %>%
+  summarise(votes = sum(vote)) %>% 
+  filter(party == "Democratic" | party == "Republican")
+sumcont12 <- total12$votes[1]/(total12$votes[1]+total12$votes[2]) * 100 - 50
+
+@
+
+<<mean district vs national>>=
+c(
+  mdist12-sumcont12,
+  mdist14-sumcont14,
+  mdist16-sumcont16
+)
+@
+
+Recall that a large value indicates a stronger correlation between how blue a district is and how few people vote. In this case, contrary to Bafumi et al's findings, 2016 was the worst year for Democratic turnout, and 2012 and 2014 were not substantially different. In fact, 2014 is the year where this effect is the smallest. (I note at this point that Bafumi et al claim the discrepency in 2012 was 0.49, contrary to my 0.55)
+
+But there's an even larger problem with this method: we are investigating the wrong parameters. Bafumi et al's regression was run on national vote, not sum of vote in contested districts. This is important, because not all districts are contested at all. Some have only one candidate running, and some are only contested by third party candidates, meaning that only one of the two major parties is represented in the race. This is especially true of states like Louisiana or California, where a party can be locked out of the general election. Let's take a look:
+
+<<num contested districts>>=
+c(nrow(share12), nrow(share14), nrow(share16))
+@
+
+Of the 435 seats in the house of representatives, a large portion of them, 10-20\% of them are not being contested depending on the year. Let's see what happens when we compare these discrepencies:
+
+<<popular vote, include=FALSE>>=
+popvote16 <- 61776554/(61776554+63173815) * 100 - 50
+popvote14 <- 35624357/(35624357+40081282) * 100 - 50
+popvote12 <- 59645531/(59645531+58228253) * 100 - 50
+@
+
+<<mean district vs national 2014>>=
+c(
+  mdist12-popvote12,
+  mdist14-popvote14,
+  mdist16-popvote16
+)
+@
+
+This is behaving highly unpredictably. In 2016 the mean district vote was almost exactly the popular vote. The reason why, in the past two elections, this discrepency is smaller than the previous one because there were more districts uncontested by the Republican party than districts uncontested by the Democratic party. 
+
+If we look at the mean district vote swing versus the national vote swing for the last midterm election in 2014:
+
+<<estimates for swing 2012-2014>>=
+mswing <- mdist14 - mdist12
+pswing <- popvote14 - popvote12
+mswing
+pswing
+@
+
+The final problem with this estimator is that the model looks at districts that are contested in both last election and the upcoming one, and adjusts the model such that the mean result for those districts will shift by the mean district swing. The difference between the mean share in 2014 and 2016 for races that are contested in both elections is a different value than the difference between the mean share for races contested in 2014 and the mean share for races contested in 2016. 
+
+The reason for this is that if a race is contested in one election and not the other, it is likely because it is so partisan as to potentially not warrant a candidate. Thus, in the election where this district is included, it will have large sway on the mean district vote. To believe that this doesn't have an effect on the mean district swing is to assume that the amount of districts that are uncontested on each side of the aisle remains constant year to year, which is untrue. We can see that between 2012 and 2014: 
+
+<<>>=
+(share12 %>% filter(!(district %in% share14$district)))$dem_share %>% mean()
+(share14 %>% filter(!(district %in% share12$district)))$dem_share %>% mean()
+@
+
+A lot of very blue seats in 2012 were not contested in 2014, which messes up the estimate for mean district swing. If we only consider districts contested in both elections:
+
+<<2014 prediction data, include=FALSE>>=
+pres_results <- read_csv("data/presresults.csv")
+
+pred14 <- share14 %>% merge(share12, by="district") %>% 
+  mutate(dem_share12 = dem_share.y, dem_share14 = dem_share.x, incumbent14 = inc, incumbent12=incumbent) %>%
+  merge(pres_results, by="district")
+@
+
+<<>>=
+nrow(pred14)
+mswing <- mean(pred14$dem_share14) - mean(pred14$dem_share12)
+mswing
+@
+
+We see that these 327 districts shifted by an average of -3.48 points. Ultimately, this is the value we are interested in, and it is incredibly close to the national vote swing of -3.55. 
+
+Because the national vote swing tracked this swing so well in 2014, and because 2016's mean district vote is so close to the national vote. I will ignore these effects, and treat the national vote swing as if it were the mean district vote swing. It is highly possible, perhaps likely, that a drop in turnout will benefit the Democrats mean district vote compared to the national vote in 2018. However, the districts I've discovered are uncontested in 2018 but were contested in 2016 are California 5, 6, 8, 13, 19, and 20, all of which are held by Democrats. This will hurt them in that metric. Moving forward, I am ignoring both of these effects. 
+
+\section*{Finding Forecast Error}
+
+There is one last step before we run our model on 2018. Bafumi et al propose only dividing races up into those with incumbents and those with open seats. Any race that was uncontested in the previous election is conceded immediately. They propose the following models.
+
+For open seats:
+$$\textnormal{DemVote\%}2014_k = \beta_0 + 0.95 \textnormal{Obama\%}2012_k + u_k$$
+For contested seats:
+$$\textnormal{DemVote\%}2014_k = \beta_0 + 0.63 \textnormal{DemVote\%}2012_k + 0.46 \textnormal{Obama\%}2012_k + 2.03 \textnormal{frosh}_k + u_k$$
+Where frosh is a dummy variable set to 1 if the candidate is a freshman Democrat and -1 if they are a freshman Republican, to simulate incumbency advantage. The intercepts are set so that the mean open district vote in 2014 is shifted from the 2012 vote in those seats according to the national vote swing from 2012, and the mean incumbent district vote in 2014 is shifted from the 2012 vote in those seats according to the national vote swing from 2012. 
+
+We want estimates for $u_k$. Namely, we want to know how much we expect individual races to vary from what we expect from how they've voted in the past combined with national swing. To do this, we run this model on 2014 data.
+
+<<2014 open seats, include=FALSE>>=
+open14 <- pred14 %>%
+  filter(incumbent14 == 0) %>% 
+  mutate(Oshare = obama2012/(obama2012 + romney2012) * 100 - 50,
+         pred = 0.95 * Oshare) %>%
+  select(district, pred, dem_share14, dem_share12, Oshare)
+@
+
+<<>>=
+nrow(open14)
+@
+
+We have 41 open seats. They vary from our prediction of them (using the template above):
+
+<<open seat variance>>=
+openvar <- var(open14$dem_share14 - open14$pred) %>% sqrt()
+openvar
+@
+
+Thus we say that districts with open seats will vary with a standard deviation of 6.2 percentage points from their expected center given voting history and national swing.
+
+What happens if we make the linear model ourselves, using this data? The template above is calculated using 2008's prediction of 2010. But we want to use 2012's prediction of 2014 and apply that to 2018:
+
+<<open seat linear model 2014>>=
+sum_open <- lm(dem_share14 ~ Oshare, data=open14) %>% summary()
+sum_open
+@
+
+This is very close to their findings. 
+
+<<myopenvar, include=FALSE>>=
+myopenvar <- var(sum_open$residuals) %>% sqrt()
+myopenvar #6.186 compared to 6.197. Basically the exact same thing.
+@
+
+Now let's take a look at seats with incumbents:
+
+<<2014 incumbent seats, include=FALSE>>=
+inc14 <- pred14 %>%
+  filter(incumbent14 != 0) %>% 
+  mutate(Oshare = obama2012/(obama2012 + romney2012) * 100 - 50,
+         frosh = (incumbent12 != incumbent14) * incumbent14,
+         pred = 0.46 * Oshare + 0.63 * dem_share12 + 2.03 * frosh) %>%
+  select(district, pred, dem_share14, dem_share12, frosh, Oshare)
+@
+
+<<>>=
+nrow(inc14)
+@
+
+Now we're looking at the remaining 286 seats. They vary from our prediction (using the incumbent template):
+
+<<estimating incumbent variance>>=
+incvar <- var(inc14$dem_share14 - inc14$pred) %>% sqrt()
+incvar 
+@
+
+Thus we say that districts with incumbents will vary with a standard deviation of 4.1 percentage points from their expected center given voting history and national swing. It is expected that seats with incumbents should vary less from our expectations than open seats. 
+
+<<our own incumbent linear model>>=
+sum_inc <- lm(dem_share14 ~ Oshare + frosh + dem_share12, data=inc14) %>% summary()
+sum_inc
+@
+
+This is interesting. If we run our own linear model on 2014's prediction from 2012, we see that a lot more weight it put on how the incumbent preformed in the last election(0.85 in my model vs 0.63 in Bafumi et al's), and much less weight is put on how it voted for President (0.15 in my model compared to 0.46 in Bafumi et al's). These are highly correlated, so it is unsurprising that this would shift year-to-year. Picking which model to use in 2018 is largely ideological: how much, in your opinion, is the GOP the party of Trump? TO what degree is it still the party of the incumbents? 
+
+<<myincvar, include=FALSE>>=
+myincvar <- var(sum_inc$residuals) %>% sqrt()
+myincvar #3.787 compared to 4.1.
+@
+
+Finally, it's worth noting that the model assumes both open seats and incumbent seats shift by the mean district shift. We can see that isn't true:
+
+<<estimating seat swing>>=
+c(mean(open14$dem_share12) + mswing, mean(open14$dem_share14))
+@
+
+We overestimate the mean district swing in open seats, and...
+
+<<>>=
+c(mean(inc14$dem_share12) + mswing, mean(inc14$dem_share14))
+@
+
+...underestimate the mean district swing in incumbent seats. One reason for this might be incumbency advantage. Because a majority of the vacated seats were vacated by Republicans, the loss of incumbency advantage caused the open seats to shift by less in the Republican's favor.
+
+\section*{Predicting 2018}
+
+Now we move on to predict the 2018 election results with what we have. We have two 
+
+<<compiling 2018 data, include=FALSE>>=
+# this entire block shows how I made my congressional district 2018 data
+
+# states with at-large districts, encoded as "AL" in one dataset and "00" in the other
+alstates <- c("AK", "DE", "MT", "ND", "SD", "VT", "WY")
+
+# First get districts in terms of what the rest of the datasets are using i.e. "AL 02"
+pred18 <- house16 %>%
+  mutate(st = state.abb[match(state,state.name)],
+         fips = fips - fips * (st %in% alstates),
+         dnum = sprintf("%02d",fips),
+         district = paste(st, dnum, sep=" ")) %>%
+  group_by(district) %>%
+  summarise(rep16 = sum((individual_party == "republican")* vote_pct),
+            dem16 = sum((individual_party == "democrat")* vote_pct),
+            incumbent16 = getincumbent(district, individual_party, is_incumbent == "True")) %>% 
+  filter(rep16 > 0, dem16 > 0) %>%
+  mutate(dem16share = dem16 / (dem16 + rep16) * 100 - 50) %>%
+  merge(pres_results, by="district") %>%
+  mutate(pres16share = clinton2016/(clinton2016 + trump2016) * 100 - 50) %>%
+  select(district, dem16share, incumbent16, pres16share)
+
+#write_csv(pred18, "~/SummerResearch/pred18.csv")
+@
+
+We start by dividing the races into those which are conceded to democrats, those which are conceded to Republicans, and those which are contested in both 2016 and 2018, which we further divide into open seats and incumbent seats: 
+
+<<include=FALSE>>=
+cd2018data <- read_csv("data/cd2018data.csv")
+Dconcede <- cd2018data %>% filter(concede == 1) %>% nrow() # 41 races handed to Democrats
+Rconcede <- cd2018data %>% filter(concede == -1) %>% nrow() # 27 races handed to Republicans
+cd2018data %>% filter(concede == 0) %>% nrow() 
+
+open18 <- cd2018data %>%
+  filter(concede == 0, incumbent18 == 0)
+inc18 <- cd2018data %>%
+  filter(concede == 0, incumbent18 != 0)
+@
+
+<<>>=
+c(Dconcede, 
+  Rconcede, 
+  nrow(open18), 
+  nrow(inc18))
+@
+
+We see that there are 41 races conceded to Democrats, 27 races conceded to Republicans, 68 open seats and 299 contested incumbent races. 
+
+<<>>=
+open18 %>% filter(incumbent16 == 1) %>% nrow()
+open18 %>% filter(incumbent16 == -1) %>% nrow()
+@
+
+We note that the open seats overwhelmingly were vacated by Republicans. Thus we probably underestimate Democratic performance in these seats and thus slightly overestimate Democratic performance in incumbent seats.
+
+We run the model using Bafumi et al's template.
+
+<<math, include=FALSE>>=
+# first we adjust the intercept. We want mean(0.95 * presshare + x) = mean(demshare16) + nat swing
+# thus mean(demshare16) - 0.95 * mean(pres16share) + natswing
+openint <- mean(open18$dem16share) - 0.95 * mean(open18$pres16share) 
+openint # -2.4. This is the "base intercept"
+
+# for the incumbent seats, we want mean(demshare16) + natswing = x + mean(0.63 demvote16 + 0.46 pres16 + 2.03frosh)
+# thus, x = mean(demshare16) - mean(0.63 demvote16 + 0.46 pres16 + 2.03frosh) + natswing
+inc18 <- inc18 %>%
+  mutate(frosh = incumbent18 * (incumbent16 != incumbent18))
+
+incint <- mean(inc18$dem16share) - mean(0.63 * inc18$dem16share + 0.46 * inc18$pres16share + 2.03 * inc18$frosh)
+incint # -0.69. This is the "base intercept"
+
+open18 <- open18 %>% # expectation if national swing is even
+  mutate(exp18 = openint + 0.95 * pres16share) 
+
+inc18 <- inc18 %>% # expectation if national swing is even
+  mutate(exp18 = incint + 0.63 * dem16share + 0.46 * pres16share + 2.03 * frosh)
+
+housedat <- list(I = nrow(inc18),
+                 J = nrow(open18),
+                 D = Dconcede,
+                 R = Rconcede,
+                 expswing = expswing,
+                 sdswing = sdswing,
+                 dfswing = dfswing,
+                 expI = inc18$exp18,
+                 expJ = open18$exp18,
+                 sdI = 4.0,
+                 sdJ = 6.2)
+@
+
+<<stan prep, include=FALSE>>=
+parallel::detectCores()
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+
+fit <- stan(file = 'houseforecast.stan', data = housedat, 
+            iter=11000, warmup=1000, chains=4, seed=483892929)
+posterior <- as.matrix(fit) %>% data.frame()
+@
+
+We get the following distribution of seats:
+
+<<>>=
+ggplot(aes(x=dseats, fill=(dseats > 217)), data=posterior) + geom_histogram(binwidth=1)
+@
+
+We calculate the probability of a blue house:
+
+<<>>=
+sum(posterior$dseats > 217) / length(posterior$dseats)
+@
+
+About a two-thirds chance of Democrats winning the house in November!
+
+<<making the dataset, include=FALSE>>=
+dem_win_pct <- ((colSums(posterior > 0)/40000) %>% head(-3))[-c(1:368)] * 100
+dem_share <- ((colMeans(posterior)) %>% head(-3))[-c(1:368)] + 50
+dem_share[dem_share > 100] = 100
+district <- c(inc18$district, open18$district)
+forecast <- data.frame(district, dem_share, dem_win_pct)
+rownames(forecast) <- c()
+@
+
+<<seat dist, include=FALSE>>=
+safeD <- forecast %>% filter(dem_win_pct >= 99) %>% nrow() + 41 
+solidD <- forecast %>% filter(dem_win_pct < 99, dem_win_pct >= 90) %>% nrow() 
+likelyD <- forecast %>% filter(dem_win_pct < 90, dem_win_pct >= 75) %>% nrow()
+leanD <- forecast %>% filter(dem_win_pct < 75, dem_win_pct >= 60) %>% nrow()
+tossup <- forecast %>% filter(dem_win_pct < 60, dem_win_pct > 40) %>% nrow()
+leanR <- forecast %>% filter(dem_win_pct <= 40, dem_win_pct > 25) %>% nrow()
+likelyR <- forecast %>% filter(dem_win_pct <= 25, dem_win_pct > 10) %>% nrow() 
+solidR <- forecast %>% filter(dem_win_pct <= 10 & dem_win_pct > 1) %>% nrow()
+safeR <- forecast %>% filter(dem_win_pct <= 1) %>% nrow() + 27
+@
+
+<<>>=
+c(safeD, solidD, likelyD, leanD, tossup, leanR, likelyR, solidR, safeR)
+@
+
+We can also see the distribution of how ``safe" seats are according to this forecast. I've written the point estimates and win percentages to a csv file which can be viewed independently.
+
+\section*{Choices}
+
+A final important part of this forecast, which I have investigated at great length above, is the number of arbitrary decisions one has to make in dealing with data. This is an open-source project. Anyone can edit this, and if you do, I encourage you to play around with some or all of the following components:
+\begin{itemize}
+\item Is the estimated shift of 1.42 for registered voter polls as compared to likely voter polls appropriate? Is it consistent for all elections since World War 2? Should we be using a more sophisitcated shifting mechanism?
+\item Would the results of the initial regression change if you included poll respondents who ``leaned towards the Democrats" as a Democratic respondent, and those who ``leaned towards the Republicans" as a Republican respondent?
+\item If an incumbent runs but loses renomination, I count that as an open seat, not considering incumbency advantage. Is that appropriate? Can a more sophisticated mechanism be used?
+\item I spent a good deal of time investigating how turnout affects mean district swing. How can you estimate the size of this effect in 2018?
+\item How would you estimate how the effect on mean district swing caused by the change in which districts are contested between 2016 and 2018, as explored above?
+\item Currently we concede all races in 2018 that went uncontested in 2016. Is this a potential danger? Is there a race that might have gone from uncontested to competitive in 2 years? If so, what is a more sophisticated model we could use, given that we don't have a precedent for how the district votes?
+\item To what degree do you trust the way a district voted for President last cycle and how they voted for representative, given an incumbent is in power? Which of the two templates (Bafumi et al's 2010 one, or my 2014 one) do you trust more?
+\item Given the investigation above, open seats and incumbent seats might not shift by the same amount, based on who is giving up incumbency advantage. Can you quantify how off our underestimates of open seats and overestimates of incumbent seats would be, to decrease bias?
+\end{itemize}
+
+\section*{TODO}
+\begin{itemize}
+\item Add in 1946 and 1950 congressional ballot data.
+\item Add in 2014 and 2018 congressional ballot data.
+\item Talk about NY 13 in 2012, and CA 30, CA 44, IA 03, LA 03, and OH 16 in 2014 (multiple incumbents)
+\item Deal with Pennsylvania
+\item Write forecast data set
+\end{itemize}
+
+\end{document}

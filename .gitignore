@@ -1,0 +1,6 @@
+*.sty
+*.log
+*.gz
+*.tex
+*.rds
+figure/*
