@@ -6,6 +6,7 @@ In this report I will recreate their methodology to predict the results of the 2
 
 ### Repos and Resources used:
 
+* [Forecasting model paper](https://www.cambridge.org/core/journals/ps-political-science-and-politics/article/div-classtitlenational-polls-district-information-and-house-seats-forecasting-the-2014-midterm-electiondiv/30AA4C783033BC766ADC110C9317EB33)
 * [2016 election data](https://github.com/Prooffreader/election_2016_data)
 * [2000-2014 election data](https://github.com/timothyrenner/fec-election-results)
 * [Stan](http://mc-stan.org/)
