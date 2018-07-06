@@ -4,6 +4,7 @@
 Compiled using the [Presidential results from DailyKos](https://docs.google.com/spreadsheets/d/1VfkHtzBTP5gf4jAu8tcVQgsBJ1IDvXEHjuMqYlOgYbA) and [Prooffreader's 2016 election data](https://github.com/Prooffreader/election_2016_data)
 
 Column Name | Explanation
+------------- | -------------
 `district` | Congressional district, in format "AB ##" with at-large districts numbered 00. 
 `dem16share` | percentage of two-party vote won by Democratic house candidate in 2016, meansured in percentage points from 50. Set to 0 in conceded races.
 `incumbent16` | -1 if a Republican incumbent ran in 2016, 1 if a Democratic incumbent ran, 0 otherwise.
@@ -15,6 +16,7 @@ Column Name | Explanation
 Data obtained from Roper Archive's poll searching database, compiled by hand.
 
 Column Name | Explanation
+------------- | -------------
 `start_date` | first day poll was conducted
 `end_date` | last day poll was conducted
 `year` | year of poll
@@ -34,6 +36,7 @@ Column Name | Explanation
 [Data obtained from DailyKos](https://docs.google.com/spreadsheets/d/1VfkHtzBTP5gf4jAu8tcVQgsBJ1IDvXEHjuMqYlOgYbA) reformatted by me. Contains Presidential election results 2008-2016 by congressional district.
 
 Column Name | Explanation
+------------- | -------------
 `district` | Congressional district, in format "AB ##" with at-large districts numbered 00. 
 `incumbent` | Current (2018) incumbent in congress
 `party` | Party of current incumbent
@@ -43,6 +46,7 @@ Column Name | Explanation
 Compiled by me.
 
 Column Name | Explanation
+------------- | -------------
 `year` | Year of election
 `chrseats` | change in Republican seats due to this election
 `prevrseats` | Republicans seats before election
