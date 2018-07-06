@@ -1,6 +1,6 @@
-### House 2018 Data
+# House 2018 Data
 
-# cd2018data.csv
+### cd2018data.csv
 Compiled using the [Presidential results from DailyKos](https://docs.google.com/spreadsheets/d/1VfkHtzBTP5gf4jAu8tcVQgsBJ1IDvXEHjuMqYlOgYbA) and [Prooffreader's 2016 election data](https://github.com/Prooffreader/election_2016_data)
 
 Column Name | Explanation
@@ -11,7 +11,7 @@ Column Name | Explanation
 `incumbent18` | -1 if a Republican incumbent is running in 2018, 1 if a Democratic incumbent is running, 0 otherwise. Pennsylvania is treated to have no incumbents due to redistricting
 `concede` | 1 if race should be automatically assumed Democratic win according to Bafumi et al's model, -1 if it should be automatically assumed to be a Republican win. 
 
-# genpollsmayjune.csv
+### genpollsmayjune.csv
 Data obtained from Roper Archive's poll searching database, compiled by hand.
 
 Column Name | Explanation
@@ -30,7 +30,7 @@ Column Name | Explanation
 `nat_vote_rep` | percentage of national house vote that went to Republicans that year
 
 
-# presresults.csv
+### presresults.csv
 [Data obtained from DailyKos](https://docs.google.com/spreadsheets/d/1VfkHtzBTP5gf4jAu8tcVQgsBJ1IDvXEHjuMqYlOgYbA) reformatted by me. Contains Presidential election results 2008-2016 by congressional district.
 
 Column Name | Explanation
@@ -39,7 +39,7 @@ Column Name | Explanation
 `party` | Party of current incumbent
 `candidate####` | percentage of votes from that district won by candidate in the given year. 
 
-# seatchange.csv
+### seatchange.csv
 Compiled by me.
 
 Column Name | Explanation
