@@ -32,16 +32,16 @@ generated quantities {
   int<lower=0> dseats = D;
   for (i in 1:I) {
     if (resI[i] > 0) {
-      rseats = rseats + 1;
-    } else {
       dseats = dseats + 1;
+    } else {
+      rseats = rseats + 1;
     }
   }
   for (j in 1:J) {
     if (resJ[j] > 0) {
-      rseats = rseats + 1;
-    } else {
       dseats = dseats + 1;
+    } else {
+      rseats = rseats + 1;
     }
   }
 }
