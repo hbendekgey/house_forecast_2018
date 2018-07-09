@@ -576,15 +576,15 @@ A final important part of this forecast, which I have investigated at great leng
 \item Currently we concede all races in 2018 that went uncontested in 2016. This poses a potential danger. For example, PA 18 was not contested by Democrats in 2016, but Democrats actually won it in the early 2018 special election (although due to redistricting that district no longer exists). What is a more sophisticated model we could use, given that we don't have a precedent for how the district votes?
 \item To what degree do you trust the way a district voted for President last cycle and how they voted for representative, given an incumbent is in power? Which of the two templates (Bafumi et al's 2010 one, or my 2014 one) do you trust more?
 \item Given the investigation above, open seats and incumbent seats might not shift by the same amount, based on who is giving up incumbency advantage. Can you quantify how off our underestimates of open seats and overestimates of incumbent seats would be, to decrease bias?
+\item Count Pennsylvanian incumbents as incumbents? Currently I'm not because of redistricting.
 \end{itemize}
 
 \section*{TODO}
 \begin{itemize}
 \item Add in 1946 and 1950 congressional ballot data.
 \item Add in 2014 and 2018 congressional ballot data.
-\item Deal with Pennsylvania
 \item Write forecast data set
-\item Talk about NY 13 in 2014, and CA 30, CA 44, IA 03, LA 03, and OH 16 in 2012 (multiple incumbents)
+\item Talk about CA 30, CA 44, IA 03, LA 03, and OH 16 in 2012 (multiple incumbents)
 \end{itemize}
 
 \end{document}
