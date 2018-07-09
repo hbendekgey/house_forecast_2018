@@ -14,7 +14,6 @@ library(readr)
 library(ggplot2)
 library(gtools)
 library(rstan)
-library(bayesplot)
 options(digits=4)
 @
 
@@ -56,7 +55,9 @@ model <- genpolls %>%
   mutate(president_party = -1 * midterm) %>%
   select(year, genpoll, vote, president_party)
 
-fit <- lm(vote ~ genpoll + president_party, data=model)
+compare_model <- filter(model, year != 2014)
+
+fit <- lm(vote ~ genpoll + president_party, data=compare_model)
 @
 
 <<reg fit>>=
@@ -66,37 +67,46 @@ summary(fit)
 In their 2014 paper, Bafumi et al propose the regression model:
 $$\textnormal{National Vote \%}=-0.14 + 0.53\textnormal{Generic Poll \%} -2.04 \textnormal{PresidentialParty} + e_j$$
 My model claims:
-$$\textnormal{National Vote \%}=-0.40 + 0.45\textnormal{Generic Poll \%} -2.08 \textnormal{PresidentialParty} + e_j$$
+$$\textnormal{National Vote \%}=-0.57 + 0.47\textnormal{Generic Poll \%} -2.14 \textnormal{PresidentialParty} + e_j$$
 
-Thus it's worth noting that my model is always going to give a smaller result than Bafumi et al's, making my results systematically pro-Republican compared to theirs. 
+The size of the effects are almost identical. However, mainly due to the intercept, my model will produce an estimate for national swing that is about a half percentage point smaller than Bafumi's. 
 
-Now I include 2014 data in the regression 
+I did not include 2014 data in this model so I could compare to Bafumi et al's regression in their 2014 paper. Now I can include that data and see if my estimates change:
 
 <<updated regression>>=
-#TODO
+updated_fit <- lm(vote ~ genpoll + president_party, data=model)
+summary(updated_fit)
 @
 
+Fortuntely, they do not. We wouldn't want a single election to have a huge influence on the regression. Now let's run this model on data from 2018 to predict the national vote. First, we find the general congressional ballot
 
-Now let's run this model on data from 2018 to predict the national vote. First, we find the general congressional ballot
+<<2018 generic ballot, include=FALSE>>=
+generic_topline <- read_csv("~/generic_topline.csv") %>%
+  filter(subgroup == "Voters") %>%
+  mutate(date = as.Date(modeldate, "%m/%d/%Y")) %>%
+  filter(date > as.Date("5/9/2018", "%m/%d/%Y"), date < as.Date("7/9/2018", "%m/%d/%Y")) %>%
+  mutate(dem_share = dem_estimate/(dem_estimate+rep_estimate))
+genpoll <- mean(generic_topline$dem_share) * 100 - 50
+params18 <- data.frame(genpoll=genpoll, president_party=-1)
+@
 
-<<2018 generic ballot>>=
-#TODO for now I'm just saying the ballot average is 56% dem. 
-params18 <- data.frame(genpoll=6, president_party=-1)
+<<>>=
+genpoll
 @
 
 With this average, we create a prediction interval for 2018's democratic national vote share:
 
 <<prediction interval>>=
-interval <- predict.lm(fit, params18, interval = "prediction")
+interval <- predict.lm(updated_fit, params18, interval = "prediction")
 interval
--0.14 + 0.53 * 6 +2.04 #Bafumi et al point estimate
+-0.14 + 0.53 * genpoll +2.04 #Bafumi et al point estimate
 @
 
 Thus I predict that Democrats will win 54.39\% of the popular vote, compared to Bafumi et al's prediction of 55.08\%. I will continue to use my estimates firstly because I have all the data for it and stand by my methodology, and secondly because I need to know the uncertainty attached to this estimate, something Bafumi et al do not give access to. 
 
 <<standard error, include=FALSE>>=
 qt(0.975, df=13) # t-cutoff of 2.16
-c((4.386-0.1905)/2.16,(8.581-4.386)/2.16) #SE for t-distribution is 1.942
+c((3.367+0.5591)/2.16,(7.293-3.367)/2.16) #SE for t-distribution is 1.818
 @
 
 Mathematically, I am saying that the democratic share of the two-party vote, measured in percentage points away from 50, is distributed t(4.386, 1.942, df=13). This gives us our prediction interval that we are 95\% confident the value will be between 0.19 and 8.58. This means I am all but certain the Democrats will win the national house vote. 
@@ -113,8 +123,8 @@ interval - (49.441-50)
 @
 
 <<swing params, include=FALSE>>=
-expswing <- 4.945
-sdswing <- 1.942
+expswing <- 3.926 # if I use Bafumi's, I will get 4.493
+sdswing <- 1.818
 dfswing <- 13
 @
 
@@ -544,6 +554,7 @@ dem_share[dem_share > 100] = 100
 district <- c(inc18$district, open18$district)
 forecast <- data.frame(district, dem_share, dem_win_pct)
 rownames(forecast) <- c()
+#write.csv(forecast, "forecast.csv")
 @
 
 <<seat dist, include=FALSE>>=
@@ -581,9 +592,6 @@ A final important part of this forecast, which I have investigated at great leng
 
 \section*{TODO}
 \begin{itemize}
-\item Add in 1946 and 1950 congressional ballot data.
-\item Add in 2014 and 2018 congressional ballot data.
-\item Write forecast data set
 \item Talk about CA 30, CA 44, IA 03, LA 03, and OH 16 in 2012 (multiple incumbents)
 \end{itemize}
 

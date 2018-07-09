@@ -1,4 +1,5 @@
 start_date,end_date,year,pollster,population,sample_size,method,dem,rep,dem_lean,rep_lean,nat_vote_dem,nat_vote_rep
+1-Jun,6-Jun,1946,Gallup,RV,1500,PI,40,40,,,45,53.5
 7-May,12-May,1958,Gallup,RV,1636,PI,52,35,4,3,56,43.6
 28-May,2-Jun,1958,Gallup,RV,1500,PI,49,34,3,4,56,43.6
 2-May,7-May,1954,Gallup,RV,1500,PI,49,35,5,4,52.5,47
@@ -88,3 +89,20 @@ start_date,end_date,year,pollster,population,sample_size,method,dem,rep,dem_lean
 21-Jun,27-Jun,2010,Rasmussen,LV,3500,,38,44,,,44.9,51.7
 29-Jun,30-Jun,2010,Fox,RV,900,,40,42,,,44.9,51.7
 28-Jun,3-Jul,2010,Gallup,RV,1600,,44,46,,,44.9,51.7
+5-May,11-May,2014,Rasmussen,LV,3500,,40,38,,,45.5,51.2
+10-May,13-May,2014,Fox,RV,1025,,43,40,,,45.5,51.2
+12-May,18-May,2014,Rasmussen,LV,3500,,41,37,,,45.5,51.2
+16-May,19-May,2014,CBS,RV,,,40,39,,,45.5,51.2
+19-May,25-May,2014,Rasmussen,LV,3500,,42,38,,,45.5,51.2
+26-May,1-Jun,2014,Rasmussen,LV,3500,,41,38,,,45.5,51.2
+29-May,1-Jun,2014,ABC/Wash Post,RV,,,47,45,,,45.5,51.2
+1-Jun,3-Jun,2014,Fox,RV,1006,,39,43,,,45.5,51.2
+2-Jun,8-Jun,2014,Rasmussen,LV,3500,,41,37,,,45.5,51.2
+6-Jun,9-Jun,2014,Bloomberg,LV,763,,43,43,,,45.5,51.2
+9-Jun,15-Jun,2014,Rasmussen,LV,3500,,39,37,,,45.5,51.2
+16-Jun,22-Jun,2014,Rasmussen,LV,3500,,40,38,,,45.5,51.2
+20-Jun,22-Jun,2014,CBS/Times,RV,,,42,39,,,45.5,51.2
+21-Jun,23-Jun,2014,Fox,RV,1018,,42,42,,,45.5,51.2
+23-Jun,29-Jun,2014,Rasmussen,LV,3500,,40,38,,,45.5,51.2
+30-Jun,6-Jul,2014,Rasmussen,LV,3500,,41,38,,,45.5,51.2
+24-Jun,30-Jun,2014,Quinnipiac,RV,1446,,41,39,,,45.5,51.2
