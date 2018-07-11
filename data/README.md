@@ -3,6 +3,8 @@
 ### cd2018data.csv
 Compiled using the [Presidential results from DailyKos](https://docs.google.com/spreadsheets/d/1VfkHtzBTP5gf4jAu8tcVQgsBJ1IDvXEHjuMqYlOgYbA) and [Prooffreader's 2016 election data](https://github.com/Prooffreader/election_2016_data)
 
+Note: Pennsylvania was redistricted due to a court ruling in February 2018. In order to estimate how these districts voted for President and representative in 2016, I referred to [this analysis] (https://www.cookpolitical.com/analysis/house/pennsylvania-house/new-pennsylvania-map-major-boost-democrats) by Cook Political, treating each new district as a successor of a previous district (not necessarily of the same number). I shifted every seat's results according to the change in Cook PVI for that district. For the three districts uncontested in 2016 (new districts PA 04, 14, 16) I set their 2016 representative results to be the same as their adjusted Presidential results. 
+
 Column Name | Explanation
 ------------- | -------------
 `district` | Congressional district, in format "AB ##" with at-large districts numbered 00. 
