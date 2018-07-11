@@ -105,8 +105,8 @@ interval
 Thus I predict that Democrats will win 54.39\% of the popular vote, compared to Bafumi et al's prediction of 55.08\%. I will continue to use my estimates firstly because I have all the data for it and stand by my methodology, and secondly because I need to know the uncertainty attached to this estimate, something Bafumi et al do not give access to. 
 
 <<standard error, include=FALSE>>=
-qt(0.975, df=13) # t-cutoff of 2.16
-c((3.367+0.5591)/2.16,(7.293-3.367)/2.16) #SE for t-distribution is 1.818
+qt(0.975, df=15) # t-cutoff of 2.12
+c((3.367+0.5591)/2.131,(7.293-3.367)/2.131) #SE for t-distribution is 1.842
 @
 
 Mathematically, I am saying that the democratic share of the two-party vote, measured in percentage points away from 50, is distributed t(4.386, 1.942, df=13). This gives us our prediction interval that we are 95\% confident the value will be between 0.19 and 8.58. This means I am all but certain the Democrats will win the national house vote. 
@@ -124,8 +124,8 @@ interval - (49.441-50)
 
 <<swing params, include=FALSE>>=
 expswing <- 4.493 # if I use mine, I will get 3.926
-sdswing <- 1.818
-dfswing <- 13
+sdswing <- 1.842
+dfswing <- 15
 @
 
 Mathematically, we say taht the swing in national democratic share of two-party vote is distributed t(4.945, 1.942, df=13) with the prediction interval shown above.
@@ -521,17 +521,16 @@ housedat <- list(I = nrow(inc18),
                  dfswing = dfswing,
                  expI = inc18$exp18,
                  expJ = open18$exp18,
-                 sdI = 4.0,
-                 sdJ = 6.2)
+                 sdI = incvar,
+                 sdJ = openvar)
 @
 
 <<stan prep, include=FALSE>>=
-parallel::detectCores()
-rstan_options(auto_write = TRUE)
-options(mc.cores = parallel::detectCores())
+cores <- parallel::detectCores() - 1
+options(mc.cores = cores)
 
 fit <- stan(file = 'houseforecast.stan', data = housedat, 
-            iter=11000, warmup=1000, chains=4, seed=483892929)
+            iter=11000, warmup=1000, chains=cores, seed=483892929)
 posterior <- as.matrix(fit) %>% data.frame()
 @
 
@@ -544,13 +543,13 @@ ggplot(aes(x=dseats, fill=(dseats > 217)), data=posterior) + geom_histogram(binw
 We calculate the probability of a blue house:
 
 <<>>=
-sum(posterior$dseats > 217) / length(posterior$dseats)
+sum(posterior$dseats > 217) / nrow(posterior)
 @
 
 About a two-thirds chance of Democrats winning the house in November!
 
 <<making the dataset, include=FALSE>>=
-dem_win_pct <- ((colSums(posterior > 0)/40000) %>% head(-3))[-c(1:368)] * 100
+dem_win_pct <- ((colSums(posterior > 0)/nrow(posterior)) %>% head(-3))[-c(1:368)] * 100
 dem_share <- ((colMeans(posterior)) %>% head(-3))[-c(1:368)] + 50
 dem_share[dem_share > 100] = 100
 district <- c(inc18$district, open18$district)
