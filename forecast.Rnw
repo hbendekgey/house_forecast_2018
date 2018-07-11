@@ -123,7 +123,7 @@ interval - (49.441-50)
 @
 
 <<swing params, include=FALSE>>=
-expswing <- 3.926 # if I use Bafumi's, I will get 4.493
+expswing <- 4.493 # if I use mine, I will get 3.926
 sdswing <- 1.818
 dfswing <- 13
 @
@@ -481,8 +481,10 @@ c(Dconcede,
 We see that there are 41 races conceded to Democrats, 27 races conceded to Republicans, 68 open seats and 299 contested incumbent races. 
 
 <<>>=
-open18 %>% filter(incumbent16 == 1) %>% nrow()
-open18 %>% filter(incumbent16 == -1) %>% nrow()
+dvacate <- open18 %>% filter(incumbent16 == 1) %>% nrow()
+rvacate <- open18 %>% filter(incumbent16 == -1) %>% nrow()
+dvacate
+rvacate
 @
 
 We note that the open seats overwhelmingly were vacated by Republicans. Thus we probably underestimate Democratic performance in these seats and thus slightly overestimate Democratic performance in incumbent seats.
@@ -493,7 +495,7 @@ We run the model using Bafumi et al's template.
 # first we adjust the intercept. We want mean(0.95 * presshare + x) = mean(demshare16) + nat swing
 # thus mean(demshare16) - 0.95 * mean(pres16share) + natswing
 
-openint <- mean(open18$dem16share) - 0.95 * mean(open18$pres16share) 
+openint <- mean(open18$dem16share) - 0.95 * mean(open18$pres16share) #+ 2.03 * (rvacate - dvacate) / nrow(open18)
 openint # -2.51. This is the "base intercept"
 
 # for the incumbent seats, we want mean(demshare16) + natswing = x + mean(0.63 demvote16 + 0.46 pres16 + 2.03frosh)
@@ -501,7 +503,7 @@ openint # -2.51. This is the "base intercept"
 inc18 <- inc18 %>%
   mutate(frosh = incumbent18 * (incumbent16 != incumbent18))
 
-incint <- mean(inc18$dem16share) - mean(0.63 * inc18$dem16share + 0.46 * inc18$pres16share + 2.03 * inc18$frosh)
+incint <- mean(inc18$dem16share) - mean(0.63 * inc18$dem16share + 0.46 * inc18$pres16share + 2.03 * inc18$frosh) #- 2.03 * (rvacate - dvacate) / nrow(open18)
 incint # -0.69. This is the "base intercept"
 
 open18 <- open18 %>% # expectation if national swing is even
