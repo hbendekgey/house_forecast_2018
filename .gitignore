@@ -3,4 +3,4 @@
 *.gz
 *.tex
 *.rds
-figure/*
+*/figure/*

@@ -39,9 +39,9 @@ Another question arises from polls that ask for party preference, and if no pref
 <<model validation, include=FALSE>>=
 # Uncomment the three lines below if you want to 
 
-seatchange <- read_csv("data/seatchange.csv")
+seatchange <- read_csv("../data/seatchange.csv")
 
-genpolls <- read_csv("data/genpollsmayjune.csv") 
+genpolls <- read_csv("../data/genpollsmayjune.csv") 
 #genpolls$rep_lean[is.na(genpolls$rep_lean)] = 0
 #genpolls$dem_lean[is.na(genpolls$dem_lean)] = 0
 
@@ -314,7 +314,7 @@ The reason for this is that if a race is contested in one election and not the o
 A lot of very blue seats in 2012 were not contested in 2014, which messes up the estimate for mean district swing. If we only consider districts contested in both elections:
 
 <<2014 prediction data, include=FALSE>>=
-pres_results <- read_csv("data/presresults.csv")
+pres_results <- read_csv("../data/presresults.csv")
 
 pred14 <- share14 %>% merge(share12, by="district") %>% 
   mutate(dem_share12 = dem_share.y, dem_share14 = dem_share.x, incumbent14 = inc, incumbent12=incumbent) %>%
@@ -460,7 +460,7 @@ pred18 <- house16 %>%
 We start by dividing the races into those which are conceded to democrats, those which are conceded to Republicans, and those which are contested in both 2016 and 2018, which we further divide into open seats and incumbent seats: 
 
 <<include=FALSE>>=
-cd2018data <- read_csv("data/cd2018data.csv")
+cd2018data <- read_csv("../data/cd2018data.csv")
 Dconcede <- cd2018data %>% filter(concede == 1) %>% nrow() # 41 races handed to Democrats
 Rconcede <- cd2018data %>% filter(concede == -1) %>% nrow() # 27 races handed to Republicans
 cd2018data %>% filter(concede == 0) %>% nrow() 
@@ -529,7 +529,7 @@ housedat <- list(I = nrow(inc18),
 cores <- parallel::detectCores() - 1
 options(mc.cores = cores)
 
-fit <- stan(file = 'houseforecast.stan', data = housedat, 
+fit <- stan(file = 'forecast.stan', data = housedat, 
             iter=11000, warmup=1000, chains=cores, seed=483892929)
 posterior <- as.matrix(fit) %>% data.frame()
 @

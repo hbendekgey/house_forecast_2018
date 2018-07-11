@@ -50,7 +50,7 @@ library(gtools)
 library(rstan)
 
 # isolate conceded, open, and incumbent races
-cd2018data <- read_csv("data/cd2018data.csv")
+cd2018data <- read_csv("../data/cd2018data.csv")
 Dconcede <- cd2018data %>% filter(concede == 1) %>% nrow() 
 Rconcede <- cd2018data %>% filter(concede == -1) %>% nrow()
 open18 <- filter(cd2018data, concede == 0, incumbent18 == 0)
@@ -96,7 +96,7 @@ housedat <- list(I = nrow(inc18),
                  sdJ = sdopen)
 cores <- max(parallel::detectCores() - 1,1)
 options(mc.cores = cores)
-fit <- stan(file = 'houseforecast.stan', data = housedat, 
+fit <- stan(file = 'forecast.stan', data = housedat, 
             iter=11000, warmup=1000, chains=cores, seed=483892929)
 posterior <- as.matrix(fit) %>% data.frame()
 
