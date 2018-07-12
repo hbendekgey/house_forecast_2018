@@ -40,7 +40,7 @@ Let's start by regressing with the 1.42 percentage point adjustment to registere
 
 seatchange <- read_csv("../data/seatchange.csv")
 
-genpolls <- read_csv("GenericPolls.csv") 
+genpolls <- read_csv("../data/GenericPolls.csv") 
 
 model <- genpolls %>%
   filter(mtil >= 121, mtil <= 180) %>%
@@ -384,7 +384,9 @@ Because the national vote swing tracked this swing so well in 2014, and because 
 
 \section*{Finding Forecast Error}
 
-There is one last step before we run our model on 2018. Bafumi et al propose only dividing races up into those with incumbents and those with open seats. Any race that was uncontested in the previous election is conceded immediately. They propose the following models.
+There is one last step before we run our model on 2018. Bafumi et al propose only dividing races up into those with incumbents and those with open seats. Any race that was uncontested in the previous election is conceded immediately. This will rarely pose a problem, because it is unlikely a seat will go from uncontested to competitive in 2 years.
+
+However, this does pose a potential danger, because that does happen. For example, PA 18 was not contested by Democrats in 2016, but Democrats actually won it in the early 2018 special election (although due to redistricting that district no longer exists). For now I will ignore this possibility and follow Bafumi et al's methodology. They propose the following models.
 
 For open seats:
 $$\textnormal{DemVote\%}2014_k = \beta_0 + 0.95 \textnormal{Obama\%}2012_k + u_k$$
@@ -631,21 +633,6 @@ c(safeD, solidD, likelyD, leanD, tossup, leanR, likelyR, solidR, safeR)
 @
 
 We can also see the distribution of how ``safe" seats are according to this forecast. I've written the point estimates and win percentages to a csv file which can be viewed independently.
-
-\section*{Choices}
-
-A final important part of this forecast, which I have investigated at great length above, is the number of arbitrary decisions one has to make in dealing with data. This is an open-source project. Anyone can edit this, and if you do, I encourage you to play around with some or all of the following components:
-\begin{itemize}
-\item Is the estimated shift of 1.42 for registered voter polls as compared to likely voter polls appropriate? Is it consistent for all elections since World War 2? Should we be using a more sophisitcated shifting mechanism?
-\item Would the results of the initial regression change if you included poll respondents who ``leaned towards the Democrats" as a Democratic respondent, and those who ``leaned towards the Republicans" as a Republican respondent?
-\item If an incumbent runs but loses renomination, I count that as an open seat, not considering incumbency advantage. Is that appropriate? Can a more sophisticated mechanism be used?
-\item I spent a good deal of time investigating how turnout affects mean district swing. How can you estimate the size of this effect in 2018?
-\item How would you estimate how the effect on mean district swing caused by the change in which districts are contested between 2016 and 2018, as explored above?
-\item Currently we concede all races in 2018 that went uncontested in 2016. This poses a potential danger. For example, PA 18 was not contested by Democrats in 2016, but Democrats actually won it in the early 2018 special election (although due to redistricting that district no longer exists). What is a more sophisticated model we could use, given that we don't have a precedent for how the district votes?
-\item To what degree do you trust the way a district voted for President last cycle and how they voted for representative, given an incumbent is in power? Which of the two templates (Bafumi et al's 2010 one, or my 2014 one) do you trust more?
-\item Given the investigation above, open seats and incumbent seats might not shift by the same amount, based on who is giving up incumbency advantage. Can you quantify how off our underestimates of open seats and overestimates of incumbent seats would be, to decrease bias?
-\item Count Pennsylvanian incumbents as incumbents? Currently I'm not because of redistricting.
-\end{itemize}
 
 \section*{TODO}
 \begin{itemize}
