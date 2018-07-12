@@ -26,7 +26,7 @@ Program options:
 * consider-vacate
     * Allows the mean open seat and mean incumbent seat to swing by different amounts from 2016 to 2018, by considering the fact that a majority of open seats were vacated by Republicans. This gives Democrats an advantage in open seats and just slightly penalizes them in incumbent seats. (The math being done here is very simple and could be made much more sophisticated)
 * expected-swing x
-    * Manually set the expected 2016 to 2018 national vote swing to x, measured in percentage points. Defaults to 4.493. This model is based on the generic congressional ballot, which has been demonstrated a much more modest swing to Democrats than the special election results this past year. If you trust those few results more, increase this value. 
+    * Manually set the expected 2016 to 2018 national vote swing to x, measured in percentage points. Defaults to 4.476. This model is based on the generic congressional ballot, which has been demonstrated a much more modest swing to Democrats than the special election results this past year. If you trust those few results more, increase this value. 
 * stdev-swing x
     * Manually set the standard deviation of the swing prediction to x, measured in percentage points. Defaults to 1.842. A higher value indicates less certainty that the nation will swing the way this model predicts. If you believe that regressing on previous elections will not give a result that is reflective of this election (i.e. you think something about this election is never-before-seen) then increase this value. 
 * stdev-open x
@@ -34,9 +34,9 @@ Program options:
 * stdev-inc x
     * Manually set the standard deviation of incumbent congressional district results to x, measured in percentage points from how they are predicted to behave. Defaults to 4.493, or 3.709 in the 2014 template. A small value here indicates that these districts can be largely predicted by national trends, i.e. "all politics is national"
 * no-poll-adjust
-    * removes the adjustment of historic registered voter polls to the right to conform with likely voter populations
+    * removes the adjustment of historic registered voter polls to the right to conform with likely voter populations. This cannot be set if you manually set the exptected swing.
 * unfix-intercept
-    * removes the fixed intercept from the linear model predicting vote population. The fixed intercept reflects the believe that polls (once the registered voter adjustment is taken into account) are no more likely to be biased one way than the other. Setting this flag means you do not believe that.
+    * removes the fixed intercept from the linear model predicting vote population. The fixed intercept reflects the believe that polls (once the registered voter adjustment is taken into account) are no more likely to be biased one way than the other. Setting this flag means you do not believe that. This cannot be set if you manually set the expected swing.
 
 examples:
 ```console
