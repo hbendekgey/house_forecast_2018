@@ -4,3 +4,6 @@
 *.tex
 *.rds
 */figure/*
+.RData
+.RHistory
+*/GenericPolls.csv
