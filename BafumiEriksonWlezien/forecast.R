@@ -4,7 +4,7 @@ options(digits=5)
 
 # parse command-line arguments
 args <- commandArgs(trailingOnly = TRUE)
-paInc <- "PA-inc" %in% args #not handled yet
+paInc <- "PA-inc" %in% args
 template14 <- "2014-template" %in% args
 consider_vacate <- "consider-vacate" %in% args
 set_exp_swing <- "expected-swing" %in% args
