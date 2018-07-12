@@ -7,16 +7,19 @@ forecast.pdf contains a report in which I recreate their methodology to predict 
 forecast.R contains an executable R script in which individual parameters and flags can be set. It produces a distribution of Democratic house seats and a point estimate and win percentage for each individual district, according to the parameters chosen.
 
 ### Usage
-First make sure [Stan](http://mc-stan.org/) is installed. (I know, Stan is a bit overkill for such a simple model, but I wanted practice and by compiling the sampler into C code and running on multiple cores it becomes much more scalable) Explanations for all choices and all defaults can be found in the report forecast.pdf
+First make sure [Stan](http://mc-stan.org/) is installed. (I know, Stan is a bit overkill for such a simple model, but I wanted practice and by compiling the sampler into C code and running on multiple cores it becomes much more scalable) Note that the first time you run it, it can take a minute to compile the C code. Explanations for all choices and all defaults can be found in the report forecast.pdf
 
 ```console
 Usage: Rscript [R options] forecast.R [Program options]
 ```
+
+The district-by-district forecast will be written to a file named "district_forecast.csv" if no file of that name already exists in the directory (otherwise it won't write it). It will also write a probability of Democrats holding each number of seats under a file named "house_seats.csv" if no file of that name already exists.
+
 R options:
   -Standard R command line options ([read more here](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Startup.html))
 
 Program options:
-* PA-inc (not yet implemented)
+* PA-inc
     * Treat current Pennsylvanian congressmen who are running in one of the newly created districts as incumbents. By default, due to redistricting all Pennsylvanian seats are considered open seats.
 * 2014-template
     * Uses the 2014 prediction template for individual races, as opposed to the default 2010 template. This puts a lot more weight on incumbent performance in the previous election, and much less on Presidential performance. Use this if believe the 2018 Republican party is more the party of the establishment than the party of Trump. 
@@ -30,6 +33,10 @@ Program options:
     * Manually set the standard deviation of open congressional district results to x, measured in percentage points from how they are predicted to behave. Defaults to 6.133, or 6.124 in the 2014 template. A small value here indicates that these districts can be largely predicted by national trends, i.e. "all politics is national"
 * stdev-inc x
     * Manually set the standard deviation of incumbent congressional district results to x, measured in percentage points from how they are predicted to behave. Defaults to 4.493, or 3.709 in the 2014 template. A small value here indicates that these districts can be largely predicted by national trends, i.e. "all politics is national"
+* no-poll-adjust
+    * removes the adjustment of historic registered voter polls to the right to conform with likely voter populations
+* unfix-intercept
+    * removes the fixed intercept from the linear model predicting vote population. The fixed intercept reflects the believe that polls (once the registered voter adjustment is taken into account) are no more likely to be biased one way than the other. Setting this flag means you do not believe that.
 
 examples:
 ```console

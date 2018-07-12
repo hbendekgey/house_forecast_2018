@@ -1,5 +1,7 @@
 # Harry Bendekgey, house forecast based on Bafumi, Erikson, Wlezien
 
+options(digits=5)
+
 # parse command-line arguments
 args <- commandArgs(trailingOnly = TRUE)
 paInc <- "PA-inc" %in% args #not handled yet
@@ -9,10 +11,13 @@ set_exp_swing <- "expected-swing" %in% args
 set_sd_swing <- "stdev-swing" %in% args
 set_sd_open <- "stdev-open" %in% args
 set_sd_inc <- "stdev-inc" %in% args
+no_adjust <- "no-poll-adjust" %in% args
+no_fix_int <- "unfix-intercept" %in% args
 
-if (length(args) != sum(paInc, template14, consider_vacate, 
+if (length(args) != sum(paInc, template14, consider_vacate,
                         2 * set_exp_swing, 2 * set_sd_swing,
-                        2 * set_sd_open, 2 * set_sd_inc)) {
+                        2 * set_sd_open, 2 * set_sd_inc,
+                        no_adjust, no_fix_int)) {
   stop("Invalid arguments")
 }
 
@@ -31,9 +36,21 @@ parse_param <- function(flag_set, flag_str, default) {
 # set expectations and variances
 sdopen <- parse_param(set_sd_open, "stdev-open", 6.133)
 sdinc <- parse_param(set_sd_inc, "stdev-inc", 4.053)
-expswing <- parse_param(set_exp_swing, "expected-swing", 4.493) 
-sdswing <- parse_param(set_sd_swing, "stdev-swing", 1.842) 
+expswing <- parse_param(set_exp_swing, "expected-swing", 4.476) 
+sdswing <- parse_param(set_sd_swing, "stdev-swing", 1.787) 
 dfswing <- 15
+
+if ((no_adjust | no_fix_int) & set_exp_swing) {
+  stop("Cannot set no-poll-adjust or unfix-intercept flags if manually setting national swing")
+}
+
+if (no_adjust & no_fix_int) {
+  expswing <- 3.422 
+} else if (no_adjust) {
+  expswing <- 4.269
+} else if (no_fix_int) {
+  expswing <- 4.055
+}
 
 # alternate defaults for other template
 if (template14 & !set_sd_inc) {
@@ -53,9 +70,16 @@ library(rstan)
 cd2018data <- read_csv("../data/cd2018data.csv")
 Dconcede <- cd2018data %>% filter(concede == 1) %>% nrow() 
 Rconcede <- cd2018data %>% filter(concede == -1) %>% nrow()
-open18 <- filter(cd2018data, concede == 0, incumbent18 == 0)
-inc18 <- filter(cd2018data, concede == 0, incumbent18 != 0) %>%
-  mutate(frosh = incumbent18 * (incumbent16 != incumbent18))
+
+if(paInc) {
+  open18 <- filter(cd2018data, concede == 0, incumbent18 == 0)
+  inc18 <- filter(cd2018data, concede == 0, incumbent18 != 0)
+} else {
+  open18 <- filter(cd2018data, concede == 0, incumbent18 == 0 | grepl("PA",district))
+  inc18 <- filter(cd2018data, concede == 0, incumbent18 != 0 & !grepl("PA",district))
+}
+
+inc18 <- mutate(inc18, frosh = incumbent18 * (incumbent16 != incumbent18))
 
 # template params
 open_pres_coef <- ifelse(template14, 0.923, 0.95)
@@ -95,9 +119,28 @@ housedat <- list(I = nrow(inc18),
                  sdI = sdinc,
                  sdJ = sdopen)
 cores <- max(parallel::detectCores() - 1,1)
+rstan_options(auto_write = TRUE)
 options(mc.cores = cores)
+cat("Beginning simulation:")
 fit <- stan(file = 'forecast.stan', data = housedat, 
             iter=11000, warmup=1000, chains=cores, seed=483892929)
 posterior <- as.matrix(fit) %>% data.frame()
 
-print(sum(posterior$dseats > 217) / nrow(posterior))
+cat("Probability of Democrats taking house:", sum(posterior$dseats > 217) / nrow(posterior) * 100)
+cat("90% confidence interval for Democratic seats:", quantile(posterior$dseats, c(0.05,0.95)))
+dem_win_pct <- ((colSums(posterior > 0)/nrow(posterior)) %>% head(-3))[-c(1:368)] * 100
+dem_share <- ((colMeans(posterior)) %>% head(-3))[-c(1:368)] + 50
+dem_share[dem_share > 100] = 100
+district <- c(inc18$district, open18$district)
+forecast <- data.frame(district, dem_share, dem_win_pct)
+rownames(forecast) <- c()
+
+seats <- table(posterior$dseats) %>% 
+  as.data.frame() %>% 
+  mutate(seats = Var1, prob = Freq/nrow(posterior)) %>% 
+  select(seats,prob) %>%
+  filter(prob >= 0.001)
+rownames(seats) <- c()
+
+write.csv(forecast, "district_forecast.csv")
+write.csv(seats, "house_seats.csv")

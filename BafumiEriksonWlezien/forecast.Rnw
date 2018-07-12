@@ -74,28 +74,28 @@ If we run regression on the new adjustment:
 model <- mutate(model, adj_genpoll = genpoll - 1.277 * pct_rv)
 @
 
-<<fit 2>>=
+<<fit 1>>=
 fit1 <- lm(vote ~ adj_genpoll + president_party, data=model)
 coef(summary(fit1))
 @
 
 We get basically the same result but with a different intercept, which makes sense given the ubiquity of registered voter polls. If we force the intercept:
 
-<<fit 3>>=
+<<fit 2>>=
 fit2 <- lm(vote ~ 0 + adj_genpoll + president_party, data=model)
 coef(summary(fit2))
 @
 
 We get different results, which causes the generic ballot lead to translate at a lower rate into a popular vote lead. If we do no transformation at all of registered voter polls:
 
-<<fit 4>>=
+<<fit 3>>=
 fit3 <- lm(vote ~ genpoll + president_party, data=model)
 coef(summary(fit3))
 @
 
 Then we get a pretty big intercept which is verging on significant. Forcing the intercept to 0 under the claim that all polls, registered or otherwise, are unbiased, we get:
 
-<<>>=
+<<fit 4>>=
 fit4 <- lm(vote ~ 0 + genpoll + president_party, data=model)
 coef(summary(fit4))
 @
@@ -176,6 +176,7 @@ interval - dem_share16
 Mathematically, we say that the swing in national democratic share of two-party vote is distributed t(4.476, 1.79, df=15) with the prediction interval shown above.
 
 <<swing params, include=FALSE>>=
+c(interval1[1], interval[1], interval3[1], interval4[1]) - dem_share16
 expswing <- interval[1] - dem_share16
 sdswing <- se
 dfswing <- 15
@@ -519,9 +520,9 @@ Rconcede <- cd2018data %>% filter(concede == -1) %>% nrow() # 27 races handed to
 cd2018data %>% filter(concede == 0) %>% nrow() 
 
 open18 <- cd2018data %>%
-  filter(concede == 0, incumbent18 == 0)
+  filter(concede == 0, incumbent18 == 0 | grepl("PA",district))
 inc18 <- cd2018data %>%
-  filter(concede == 0, incumbent18 != 0)
+  filter(concede == 0, incumbent18 != 0 & !grepl("PA",district))
 @
 
 <<>>=
