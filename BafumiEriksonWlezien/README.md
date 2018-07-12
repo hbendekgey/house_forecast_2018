@@ -23,7 +23,7 @@ Program options:
 * consider-vacate
     * Allows the mean open seat and mean incumbent seat to swing by different amounts from 2016 to 2018, by considering the fact that a majority of open seats were vacated by Republicans. This gives Democrats an advantage in open seats and just slightly penalizes them in incumbent seats. (The math being done here is very simple and could be made much more sophisticated)
 * expected-swing x
-      Manually set the expected 2016 to 2018 national vote swing to x, measured in percentage points. Defaults to 4.493. This model is based on the generic congressional ballot, which has been demonstrated a much more modest swing to Democrats than the special election results this past year. If you trust those few results more, increase this value. 
+    * Manually set the expected 2016 to 2018 national vote swing to x, measured in percentage points. Defaults to 4.493. This model is based on the generic congressional ballot, which has been demonstrated a much more modest swing to Democrats than the special election results this past year. If you trust those few results more, increase this value. 
 * stdev-swing x
     * Manually set the standard deviation of the swing prediction to x, measured in percentage points. Defaults to 1.842. A higher value indicates less certainty that the nation will swing the way this model predicts. If you believe that regressing on previous elections will not give a result that is reflective of this election (i.e. you think something about this election is never-before-seen) then increase this value. 
 * stdev-open x
