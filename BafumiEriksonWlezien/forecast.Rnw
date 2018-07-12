@@ -611,10 +611,16 @@ About a two-thirds chance of Democrats winning the house in November!
 dem_win_pct <- ((colSums(posterior > 0)/nrow(posterior)) %>% head(-3))[-c(1:368)] * 100
 dem_share <- ((colMeans(posterior)) %>% head(-3))[-c(1:368)] + 50
 dem_share[dem_share > 100] = 100
-district <- c(inc18$district, open18$district)
+district <- c(inc18$district, open18$district, conceded$district)
+conceded <- cd2018data %>% 
+  filter(concede == 1 | concede == -1) %>% 
+  mutate(dem_share = NA, dem_win_pct = ifelse(concede==1,100,0)) %>% 
+  select(district, dem_share, dem_win_pct)
+dem_share <- c(dem_share, conceded$dem_share)
+dem_win_pct <- c(dem_win_pct, conceded$dem_win_pct)
 forecast <- data.frame(district, dem_share, dem_win_pct)
+forecast <- forecast[order(district),]
 rownames(forecast) <- c()
-#write.csv(forecast, "forecast.csv")
 @
 
 <<seat dist, include=FALSE>>=

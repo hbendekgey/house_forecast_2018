@@ -126,13 +126,21 @@ fit <- stan(file = 'forecast.stan', data = housedat,
             iter=11000, warmup=1000, chains=cores, seed=483892929)
 posterior <- as.matrix(fit) %>% data.frame()
 
-cat("Probability of Democrats taking house:", sum(posterior$dseats > 217) / nrow(posterior) * 100)
-cat("90% confidence interval for Democratic seats:", quantile(posterior$dseats, c(0.05,0.95)))
+cat("Probability of Democrats taking house:", sum(posterior$dseats > 217) / nrow(posterior) * 100, "\n")
+cat("90% confidence interval for Democratic seats:", quantile(posterior$dseats, c(0.05,0.95)), "\n")
+
 dem_win_pct <- ((colSums(posterior > 0)/nrow(posterior)) %>% head(-3))[-c(1:368)] * 100
 dem_share <- ((colMeans(posterior)) %>% head(-3))[-c(1:368)] + 50
 dem_share[dem_share > 100] = 100
-district <- c(inc18$district, open18$district)
+conceded <- cd2018data %>% 
+  filter(concede == 1 | concede == -1) %>% 
+  mutate(dem_share = NA, dem_win_pct = ifelse(concede==1,100,0)) %>% 
+  select(district, dem_share, dem_win_pct)
+district <- c(inc18$district, open18$district, conceded$district)
+dem_share <- c(dem_share, conceded$dem_share)
+dem_win_pct <- c(dem_win_pct, conceded$dem_win_pct)
 forecast <- data.frame(district, dem_share, dem_win_pct)
+forecast <- forecast[order(district),]
 rownames(forecast) <- c()
 
 seats <- table(posterior$dseats) %>% 

@@ -13,7 +13,7 @@ First make sure [Stan](http://mc-stan.org/) is installed. (I know, Stan is a bit
 Usage: Rscript [R options] forecast.R [Program options]
 ```
 
-The district-by-district forecast will be written to a file named "district_forecast.csv" if no file of that name already exists in the directory (otherwise it won't write it). It will also write a probability of Democrats holding each number of seats under a file named "house_seats.csv" if no file of that name already exists.
+The district-by-district forecast will be written to a file named "district_forecast.csv" if no file of that name already exists in the directory (otherwise it won't write it). Note that some districts are considered uncompetitive, and thus will not get an estimate for democratic vote share. The script will also write a probability of Democrats holding each number of seats under a file named "house_seats.csv" if no file of that name already exists.
 
 R options:
   -Standard R command line options ([read more here](https://stat.ethz.ch/R-manual/R-devel/library/base/html/Startup.html))
