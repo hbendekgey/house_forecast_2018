@@ -634,9 +634,4 @@ c(safeD, solidD, likelyD, leanD, tossup, leanR, likelyR, solidR, safeR)
 
 We can also see the distribution of how ``safe" seats are according to this forecast. I've written the point estimates and win percentages to a csv file which can be viewed independently.
 
-\section*{TODO}
-\begin{itemize}
-\item Talk about CA 30, CA 44, IA 03, LA 03, and OH 16 in 2012 (multiple incumbents)
-\end{itemize}
-
 \end{document}
