@@ -537,7 +537,12 @@ posterior <- as.matrix(fit) %>% data.frame()
 We get the following distribution of seats:
 
 <<>>=
-ggplot(aes(x=dseats, fill=(dseats > 217)), data=posterior) + geom_histogram(binwidth=1)
+ggplot(aes(x=dseats, fill=(dseats > 217)), data=posterior) + 
+  geom_histogram(binwidth=1) + xlab("Democrat seats in house") + 
+  ylab("Simulations") + scale_fill_discrete(name=element_blank(),
+                        breaks=c("FALSE", "TRUE"),
+                        labels=c("Republican House", "Democratic House"))
+  
 @
 
 We calculate the probability of a blue house:
