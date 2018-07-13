@@ -1,0 +1,78 @@
+\documentclass{article}
+
+\begin{document}
+
+<<imports, include=FALSE>>=
+knitr::opts_chunk$set(message=FALSE, warning=FALSE, fig.height=5, fig.width=10, fig.align = "center")
+library(dplyr)
+library(readr)
+options(digits=4)
+@
+
+Abramowitz stuff
+
+Choices: how to use Fivethirtyeight data, and whether to adjust past data
+
+<<>>=
+seatchange <- read_csv("../data/seatchange.csv")
+
+genpolls <- read_csv("../data/GenericPolls.csv") 
+
+model <- genpolls %>%
+  filter(mtil >= 60, mtil <= 90) %>%
+  filter(!is.na(dem), !is.na(rep)) %>%
+  mutate(rmargin = rep-dem, is_rv = ifelse(is.na(type),TRUE, type == "RV" | type=="A")) %>%
+  group_by(year) %>%
+  summarise(gendiff = mean(rmargin),pct_rv=mean(is_rv)) %>%
+  mutate(adj_gendiff = gendiff + 2.7 * pct_rv) %>%
+  merge(seatchange, by="year") %>%
+  select(year, chrseats, prevrseats, gendiff, adj_gendiff, midterm, pct_rv)
+
+
+fit <- lm(chrseats ~ prevrseats + gendiff + midterm, data=model)
+summary(fit)
+@
+
+<<>>=
+generic_polllist <- read_csv("~/generic_polllist.csv", 
+                             col_types = cols(enddate = col_date(format = "%m/%d/%Y"), 
+                                              startdate = col_date(format = "%m/%d/%Y"))) %>%
+  filter(enddate > as.Date("2018-5-10"), enddate < as.Date("2018-7-08")) %>%
+  mutate(rmargin = rep-dem, 
+         adj_rmargin = adjusted_rep-adjusted_dem,
+         is_rv = population == "rv" | population == "a") 
+
+genpoll2018 <- sum(generic_polllist$adj_rmargin * generic_polllist$weight) / 
+               sum(generic_polllist$weight)
+# genpoll2018
+params18 <- data.frame(prevrseats=241, midterm=1, gendiff=genpoll2018)
+interval <- predict.lm(fit, params18, se.fit=TRUE)
+pt((-24-interval$fit)/interval$se.fit,df=interval$df)
+
+genpoll2018 <- mean(generic_polllist$adj_rmargin)
+# genpoll2018
+params18 <- data.frame(prevrseats=241, midterm=1, gendiff=genpoll2018)
+interval <- predict.lm(fit, params18, se.fit=TRUE)
+pt((-24-interval$fit)/interval$se.fit,df=interval$df)
+genpoll2018 <- sum(generic_polllist$rmargin * generic_polllist$weight) / 
+               sum(generic_polllist$weight)
+# genpoll2018
+params18 <- data.frame(prevrseats=241, midterm=1, gendiff=genpoll2018)
+interval <- predict.lm(fit, params18, se.fit=TRUE)
+pt((-24-interval$fit)/interval$se.fit,df=interval$df)
+genpoll2018 <- mean(generic_polllist$rmargin)
+#genpoll2018
+params18 <- data.frame(prevrseats=241, midterm=1, gendiff=genpoll2018)
+interval <- predict.lm(fit, params18, se.fit=TRUE)
+pt((-24-interval$fit)/interval$se.fit,df=interval$df)
+@
+
+<<>>=
+params18 <- data.frame(prevrseats=241, midterm=1, gendiff=genpoll2018)
+interval <- predict.lm(fit, params18, se.fit=TRUE)
+pt((-24-interval$fit)/interval$se.fit,df=interval$df)
+
+80.7507 - 8.4 * (1.9844) - 17.0064 -0.3296 * 235 #-30.38, Abramowitz' prediction
+@
+
+\end{document}
