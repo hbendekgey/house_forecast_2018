@@ -1,6 +1,11 @@
 \documentclass{article}
+    \usepackage{fullpage}
+    \title{Abramowitz House and Senate Forecast Model}
+    \author{Harry Bendekgey}
+    \date{July 13, 2018}
 
 \begin{document}
+\maketitle
 
 <<imports, include=FALSE>>=
 knitr::opts_chunk$set(message=FALSE, warning=FALSE, fig.height=5, fig.width=10, fig.align = "center")
@@ -9,7 +14,8 @@ library(readr)
 options(digits=4)
 @
 
-Abramowitz stuff
+
+Alan Abramowitz proposes a simple structuralist model for house and senate prediction: 
 
 Choices: how to use Fivethirtyeight data, and whether to adjust past data
 

@@ -1,6 +1,6 @@
 # Bafumi, Erikson, and Wlezien
 
-Bafumi, Erikson, and Wlezien propose a model for forecasting US house midterm elections based on data available by early July. They content that forecasts are primarily useful when submitted long enough in advance that stakeholders can respond appropriately. 
+Bafumi, Erikson, and Wlezien propose a structuralist model for forecasting US house midterm elections based on data available by early July.
 
 forecast.pdf contains a report in which I recreate their methodology to predict the results of the 2018 midterm elections in the house of representatives. Key pitfalls and parameter choices are outlined. All code for this report can be found in forecast.Rnw.
 

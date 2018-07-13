@@ -37,18 +37,20 @@ parse_param <- function(flag_set, flag_str, default) {
 sdopen <- parse_param(set_sd_open, "stdev-open", 6.133)
 sdinc <- parse_param(set_sd_inc, "stdev-inc", 4.053)
 expswing <- parse_param(set_exp_swing, "expected-swing", 4.476) 
-sdswing <- parse_param(set_sd_swing, "stdev-swing", 1.787) 
-dfswing <- 15
+sdswing <- parse_param(set_sd_swing, "stdev-swing", 1.797) 
+dfswing <- 16
 
 if ((no_adjust | no_fix_int) & set_exp_swing) {
   stop("Cannot set no-poll-adjust or unfix-intercept flags if manually setting national swing")
 }
 
 if (no_adjust & no_fix_int) {
+  dfswing <- 15
   expswing <- 3.422 
 } else if (no_adjust) {
   expswing <- 4.269
 } else if (no_fix_int) {
+  dfswing <- 15
   expswing <- 4.055
 }
 

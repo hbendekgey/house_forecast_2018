@@ -1,6 +1,6 @@
 \documentclass{article}
     \usepackage{fullpage}
-    \title{House Forecast Model}
+    \title{Bafumi, Erikson, Wlezien House Forecast Model}
     \author{Harry Bendekgey}
     \date{July 6, 2018}
     
@@ -19,7 +19,7 @@ options(digits=4)
 
 \section*{Introduction}
 
-Bafumi, Erikson, and Wlezien propose a model for forecasting US house midterm elections based on data available by early July. In this report I will recreate their methodology to predict the results of the 2018 midterm elections in the house of representatives. My goal is not only to produce forecasts but to bring attention to pitfalls in their methodology and where different choices can be made which would yield different results than the ones I obtained.
+Bafumi, Erikson, and Wlezien propose a structuralist model for forecasting US house midterm elections based on data available by early July. In this report I will recreate their methodology to predict the results of the 2018 midterm elections in the house of representatives. My goal is not only to produce forecasts but to bring attention to pitfalls in their methodology and where different choices can be made which would yield different results than the ones I obtained.
 
 \section*{Estimating National Vote}
 
@@ -130,8 +130,7 @@ genpoll2018
 Thus we claim that Democrats have on average 54\% of generic ballot respondents' support. With this average, we create a prediction interval for 2018's democratic national vote share:
 
 <<prediction interval>>=
-interval <- predict.lm(fit2, params18, interval = "prediction")
-interval
+predict.lm(fit2, params18, interval = "prediction")
 @
 
 Thus I predict that Democrats will win 53.92\% of the popular vote. Further, I am 95\% confident that the Democrats will win between 50.11\% and 57.73\% of the vote.
@@ -139,28 +138,30 @@ Thus I predict that Democrats will win 53.92\% of the popular vote. Further, I a
 At this point it's worth noting how important the decisions we made before were. Consider using one of the other models:
 
 <<include=FALSE>>=
-interval1 <- predict.lm(fit1, params18, interval = "prediction")
-interval3 <- predict.lm(fit3, params18, interval = "prediction")
-interval4 <- predict.lm(fit4, params18, interval = "prediction")
+interval1 <- predict.lm(fit1, params18, se.fit = TRUE, interval="prediction")
+interval <- predict.lm(fit2, params18, se.fit = TRUE, interval="prediction")
+interval3 <- predict.lm(fit3, params18, se.fit = TRUE, interval="prediction")
+interval4 <- predict.lm(fit4, params18, se.fit = TRUE, interval="prediction")
 @
 
 <<>>=
-c(interval1[1], interval[1], interval3[1], interval4[1])
+c(interval1$fit[1], interval$fit[1], interval3$fit[1], interval4$fit[1])
 @
 
 These are the point estimates for the national vote based on the four models used. It's worth acknowledging that the one I chose is the most friendly to Democrats, and that these two choices outlined could result in a different prediction of 1\% of all voters in the country, a large margin that will have a significant effect on predictions.
 
 <<standard error, include=FALSE>>=
-t.cuttoff <- qt(0.975, df=15)
-se <- (interval[1]-interval[2])/t.cuttoff
+t.cuttoff <- qt(0.975, df=16)
+se <- (interval$fit[1]-interval$fit[2])/t.cuttoff
 dem_share16 <- 49.441-50
 @
 
 <<>>=
+interval$df
 se
 @
 
-Mathematically, I am saying that the democratic share of the two-party vote, measured in percentage points away from 50, is distributed t(3.92, 1.79, df=15). This gives us our prediction interval that we are 95\% confident the value will be between 0.11 and 7.73. This means I am all but certain the Democrats will win the national house vote. 
+Mathematically, I am saying that the democratic share of the two-party vote, measured in percentage points away from 50, is distributed t(3.92, 1.80, df=16). This gives us our prediction interval that we are 95\% confident the value will be between 0.11 and 7.73. This means I am all but certain the Democrats will win the national house vote. 
 
 The 2016 popular vote was:
 
@@ -176,10 +177,10 @@ interval - dem_share16
 Mathematically, we say that the swing in national democratic share of two-party vote is distributed t(4.476, 1.79, df=15) with the prediction interval shown above.
 
 <<swing params, include=FALSE>>=
-c(interval1[1], interval[1], interval3[1], interval4[1]) - dem_share16
-expswing <- interval[1] - dem_share16
+c(interval1$fit[1], interval$fit[1], interval3$fit[1], interval4$fit[1]) - dem_share16
+expswing <- interval$fit[1] - dem_share16
 sdswing <- se
-dfswing <- 15
+dfswing <- interval$df
 @
 
 \section*{Mean District Swing}
@@ -611,11 +612,11 @@ About a two-thirds chance of Democrats winning the house in November!
 dem_win_pct <- ((colSums(posterior > 0)/nrow(posterior)) %>% head(-3))[-c(1:368)] * 100
 dem_share <- ((colMeans(posterior)) %>% head(-3))[-c(1:368)] + 50
 dem_share[dem_share > 100] = 100
-district <- c(inc18$district, open18$district, conceded$district)
 conceded <- cd2018data %>% 
   filter(concede == 1 | concede == -1) %>% 
   mutate(dem_share = NA, dem_win_pct = ifelse(concede==1,100,0)) %>% 
   select(district, dem_share, dem_win_pct)
+district <- c(inc18$district, open18$district, conceded$district)
 dem_share <- c(dem_share, conceded$dem_share)
 dem_win_pct <- c(dem_win_pct, conceded$dem_win_pct)
 forecast <- data.frame(district, dem_share, dem_win_pct)
@@ -624,7 +625,7 @@ rownames(forecast) <- c()
 @
 
 <<seat dist, include=FALSE>>=
-safeD <- forecast %>% filter(dem_win_pct >= 99) %>% nrow() + 41 
+safeD <- forecast %>% filter(dem_win_pct >= 99) %>% nrow() 
 solidD <- forecast %>% filter(dem_win_pct < 99, dem_win_pct >= 90) %>% nrow() 
 likelyD <- forecast %>% filter(dem_win_pct < 90, dem_win_pct >= 75) %>% nrow()
 leanD <- forecast %>% filter(dem_win_pct < 75, dem_win_pct >= 60) %>% nrow()
@@ -632,7 +633,7 @@ tossup <- forecast %>% filter(dem_win_pct < 60, dem_win_pct > 40) %>% nrow()
 leanR <- forecast %>% filter(dem_win_pct <= 40, dem_win_pct > 25) %>% nrow()
 likelyR <- forecast %>% filter(dem_win_pct <= 25, dem_win_pct > 10) %>% nrow() 
 solidR <- forecast %>% filter(dem_win_pct <= 10 & dem_win_pct > 1) %>% nrow()
-safeR <- forecast %>% filter(dem_win_pct <= 1) %>% nrow() + 27
+safeR <- forecast %>% filter(dem_win_pct <= 1) %>% nrow()
 @
 
 <<>>=
