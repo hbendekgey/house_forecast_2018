@@ -11,74 +11,148 @@
 knitr::opts_chunk$set(message=FALSE, warning=FALSE, fig.height=5, fig.width=10, fig.align = "center")
 library(dplyr)
 library(readr)
+library(ggplot2)
 options(digits=4)
 @
 
 
-Alan Abramowitz proposes a simple structuralist model for house and senate prediction: 
+Alan Abramowitz proposes a simple structuralist model for house and senate prediction. To predict the net change in Republican-held seats in a midterm election year, we need three pieces of information: which party currently holds the Presidency, the generic ballot margin in early September, and the number of seats Republicans currently hold. 
 
-Choices: how to use Fivethirtyeight data, and whether to adjust past data
+Each one of these predictors is heavily rooted in theory. That incumbents lose seats during the midterms is a well-established phenomenon; in fact, 1998 and 2002 were the only midterm election years since World War 2 where the incumbent party did not lose seats in the house. Using the currently held number of seats is a kind of exposure model, which observes that parties with more to lose are likely to lose. Finally, the generic ballot margin in August and September is a reflection of voter sentiment, which directly impacts seat swing.  
 
-<<>>=
+An older version of Abramowitz's model used the Republican margin in the previous presidential election instead of a dummy variable for who won. This is less rooted in theory, but better fits the data, party because one of the only two years the incumbent party picked up seats was 2002, and Bush lost the popular vote in 2000 which improves the consistency of the predictor. But it's important to not overfit the data; despite Trump losing the popular vote in 2016, we expect Republicans to likely lose sets this election, not gain them because they ``lost" the previous Presidential vote. 
+
+Another problem is with consistency of generic ballot data. One of Abramowitz's predictors is the generic ballot margin in early September. I interpreted this to mean the average margin in polls taken 60 to 90 days before the election. In many of the earlier elections being regressed on, this takes into account only a single poll, usually by Gallup. In recent years polling have proliferated massively. Reuters/Ipsos releases a new poll every day. In order to maintain consistency, I will only take into account live polls, including those taken over the telephone by real people. I exclude polls taken online, robotically, or by IVR (Interactive Voice Response). 
+
+I start by running regression on these predictors, using data kindly shared with me by Professors Bafumi, Erikson, and Wlezien:
+<<data, include=FALSE>>=
 seatchange <- read_csv("../data/seatchange.csv")
 
-genpolls <- read_csv("../data/GenericPolls.csv") 
+historic_genpolls <- read_csv("../data/GenericPolls.csv") 
 
-model <- genpolls %>%
+model <- historic_genpolls %>%
   filter(mtil >= 60, mtil <= 90) %>%
   filter(!is.na(dem), !is.na(rep)) %>%
   mutate(rmargin = rep-dem, is_rv = ifelse(is.na(type),TRUE, type == "RV" | type=="A")) %>%
   group_by(year) %>%
-  summarise(gendiff = mean(rmargin),pct_rv=mean(is_rv)) %>%
+  summarise(gendiff = mean(rmargin),pct_rv=mean(is_rv),count=n()) %>%
   mutate(adj_gendiff = gendiff + 2.7 * pct_rv) %>%
   merge(seatchange, by="year") %>%
-  select(year, chrseats, prevrseats, gendiff, adj_gendiff, midterm, pct_rv)
-
-
-fit <- lm(chrseats ~ prevrseats + gendiff + midterm, data=model)
-summary(fit)
+  select(year, chrseats, prevrseats, gendiff, adj_gendiff, midterm, pct_rv, count, rsen_exposure, chrseats_sen)
 @
 
 <<>>=
-generic_polllist <- read_csv("~/generic_polllist.csv", 
-                             col_types = cols(enddate = col_date(format = "%m/%d/%Y"), 
-                                              startdate = col_date(format = "%m/%d/%Y"))) %>%
-  filter(enddate > as.Date("2018-5-10"), enddate < as.Date("2018-7-08")) %>%
+fit <- lm(chrseats ~ prevrseats + gendiff + midterm, data=model)
+summary(fit)$coef
+@
+
+These results are very similar to those of Abramowitz, who proposes:
+$$\Delta_{\textnormal{R seats}} = 116.4 - 0.49 \textnormal{PrevRSeats} - 13.7 \textnormal{Midterm} + 1.795 \textnormal{Gendiff}$$
+Given that Republicans won 241 seats in 2016, the combination of the first two terms of our regressions give the same result. The only substantive difference is that I estimate incumbency to cost a party 17.7 seats instead of 13.7, which Abramowitz finds.
+
+I do not yet have access to data 60-90 days before the election (considering it hasn't happened yet) so I will use regression data from May-June and produce a forecast. I am using Fivethirtyeight's data, and they include a number of methods for aggregating polls, either by weighting them or adjusting them: 
+
+<<2018 data, include=FALSE>>=
+genpolls <- read_csv("../data/genpolls2018.csv") %>%
   mutate(rmargin = rep-dem, 
          adj_rmargin = adjusted_rep-adjusted_dem,
          is_rv = population == "rv" | population == "a") 
 
-genpoll2018 <- sum(generic_polllist$adj_rmargin * generic_polllist$weight) / 
-               sum(generic_polllist$weight)
-# genpoll2018
-params18 <- data.frame(prevrseats=241, midterm=1, gendiff=genpoll2018)
-interval <- predict.lm(fit, params18, se.fit=TRUE)
-pt((-24-interval$fit)/interval$se.fit,df=interval$df)
-
-genpoll2018 <- mean(generic_polllist$adj_rmargin)
-# genpoll2018
-params18 <- data.frame(prevrseats=241, midterm=1, gendiff=genpoll2018)
-interval <- predict.lm(fit, params18, se.fit=TRUE)
-pt((-24-interval$fit)/interval$se.fit,df=interval$df)
-genpoll2018 <- sum(generic_polllist$rmargin * generic_polllist$weight) / 
-               sum(generic_polllist$weight)
-# genpoll2018
-params18 <- data.frame(prevrseats=241, midterm=1, gendiff=genpoll2018)
-interval <- predict.lm(fit, params18, se.fit=TRUE)
-pt((-24-interval$fit)/interval$se.fit,df=interval$df)
-genpoll2018 <- mean(generic_polllist$rmargin)
-#genpoll2018
-params18 <- data.frame(prevrseats=241, midterm=1, gendiff=genpoll2018)
-interval <- predict.lm(fit, params18, se.fit=TRUE)
-pt((-24-interval$fit)/interval$se.fit,df=interval$df)
+genpollsimple <- mean(genpolls$rmargin)
+genpolladj <- mean(genpolls$adj_rmargin)
+genpollweight <- sum(genpolls$rmargin * genpolls$weight) / 
+               sum(genpolls$weight)
+genpolladjweight <- sum(genpolls$adj_rmargin * genpolls$weight) / 
+               sum(genpolls$weight)
 @
 
 <<>>=
-params18 <- data.frame(prevrseats=241, midterm=1, gendiff=genpoll2018)
-interval <- predict.lm(fit, params18, se.fit=TRUE)
-pt((-24-interval$fit)/interval$se.fit,df=interval$df)
+c(genpollsimple, genpolladj, genpollweight, genpolladjweight)
+@
 
-80.7507 - 8.4 * (1.9844) - 17.0064 -0.3296 * 235 #-30.38, Abramowitz' prediction
+Here we can see that weighting or adjusting the polls causes a minimal shift in generic ballot average. Looking back at our regression model the differences between these values will leed to a different forecast by one-third of a seat. Thus we'll just use the simple aggregation method. We get: 
+
+<<include=FALSE>>=
+genpoll2018 <- genpollsimple
+params18 <- data.frame(prevrseats=241, midterm=1, gendiff=genpoll2018)
+interval <- predict.lm(fit, params18, interval="prediction", se.fit=TRUE)
+t.cutoff <- qt(0.975, df=interval$df)
+se <- (interval$fit[1] - interval$fit[2])/t.cutoff
+dem_win_pct <- pt((-24-interval$fit[1])/se,df=interval$df)
+Abramowitz.pred <- 116.375 - 0.492 * 241 - 13.702 - 1.795 * 8 #-30.26
+@
+
+<<>>=
+dem_win_pct
+interval$fit
+Abramowitz.pred
+@
+
+We predict a 70\% chance of Democrats taking control of the house. Our point estimate is that Republicans will lose 33 seats (they need to lose 24 to lose control of the chamber) with a 95\% confidence interval of losing 69 seats to gaining 3 seats. This is a huge confidence interval. It is worth noting that I am using a prediction interval for the 2018 parameter values instead of just using residual standard error, because these parameters have a higher predictive error than average.  
+
+If we want to see it graphically, I take draws from a $t(\mu= -33, \sigma = 17,\textnormal{df}=14)$ distribution and round to the nearest whole number:
+<<echo=FALSE>>=
+set.seed(474747)
+dseats <- round(435 - (rt(50000, interval$df) * se + interval$fit[1] + 241))
+df <- data.frame(dseats)
+ggplot(aes(x=dseats, fill=(dseats > 217)), data=df) + 
+  geom_histogram(binwidth=1) + xlab("Democratic seats in house") + 
+  ylab("Simulations") + scale_fill_discrete(name=element_blank(),
+                        breaks=c("FALSE", "TRUE"),
+                        labels=c("Republican House", "Democratic House"))
+
+@
+
+Now we move on to the Senate model. The change in Republican senate seats is predicted by the generic ballot margin, (the same one used for the house model) which President controls the white house, and the difference in Republican seats up minus the number of Democratic seats up. Again, this is an application of an exposure model.
+
+<<>>=
+sen_fit <- lm(chrseats_sen ~ rsen_exposure + midterm + gendiff, data=model)
+summary(sen_fit)$coef
+@
+
+We note that these coefficients have large standard errors, and somewhat high p-values. If we use this model to predict what will happen in 2018:
+
+<<include=FALSE>>=
+params_sen18 <- data.frame(rsen_exposure=-17, midterm=1, gendiff=genpoll2018)
+sen.interval <- predict.lm(sen_fit, params_sen18, interval="prediction", se.fit=TRUE)
+sen.t.cutoff <- qt(0.975, df=sen.interval$df)
+sen.se <- (sen.interval$fit[1] - sen.interval$fit[2])/sen.t.cutoff
+dem_sen_win_pct <- pt((-2-sen.interval$fit[1])/sen.se,df=sen.interval$df)
+Abramowitz.sen.pred <- -0.895 + 0.396 * 17 - 0.209 * 8 #4.165
+@
+
+<<>>=
+dem_sen_win_pct
+sen.interval$fit
+Abramowitz.sen.pred
+@
+
+Again, this is a huge confidence interval, but it still only gives Democrats a 7\% chance of taking the Senate. In fact, of the 26 Democratic seats up, Cook Political rates 14 of them "Solid D". Of the 9 Republican seats up, 3 are considered "Solid R." Assuming these ratings are trustworthy, that means the range of possible Republican seat changes is $[-6,12]$. The predictive confidence interval spans the full range of those probabilities.
+
+There are two possible takeaways here. One is that the coefficients all have large standard errors, and so with more elections (aka more data) we can become more confident about their values and the confidence interval will similarly close. Under this interpretation, the most important thing here is the point estimate, of Republicans picking up 5 seats. 
+
+The other interpretation is that this model is somewhat lacking. We see it has a relatively small $R^2$, when compared to the house model:
+
+<<>>=
+summary(fit)$r.square
+summary(sen_fit)$r.square
+@
+
+Perhaps this is because Senate races tend to be higher profile, and thus the candidates matter more than in house races. Perhaps this is because not all seats are up every senate election cycle, and this model fails to take into account the partisan tilt of each of the three classes of senate seats. Important pieces of information, like how many of the incumbents are in seats with a lean in the other direction, are notably missing from this model. And that makes it difficult to put too much weight into this prediction.
+
+Graphically, we see the Senate distribution (using the same method previously but truncated by all possible results given how many seats are up for election) as:
+
+<<echo=FALSE>>=
+set.seed(474747)
+dseats <- round(100 - (rt(50000, sen.interval$df) * sen.se + sen.interval$fit[1] + 51))
+sen_df <- data.frame(dseats) %>%
+  filter(dseats >= 23 & dseats <=56)
+ggplot(aes(x=dseats, fill=(dseats > 50)), data=sen_df) + 
+  geom_histogram(binwidth=1) + xlab("Democratic seats in senate") + 
+  ylab("Simulations") + scale_fill_discrete(name=element_blank(),
+                        breaks=c("FALSE", "TRUE"),
+                        labels=c("Republican Senate", "Democratic Senate"))
+
 @
 
 \end{document}

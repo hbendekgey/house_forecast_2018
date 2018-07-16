@@ -38,7 +38,8 @@ It is also concerning that we are regressing on generic ballot averages across t
 Let's start by regressing with the 1.42 percentage point adjustment to registered vote and adult polls:
 <<model validation, include=FALSE>>=
 
-seatchange <- read_csv("../data/seatchange.csv")
+seatchange <- read_csv("../data/seatchange.csv") %>%
+  filter(midterm != 0)
 
 genpolls <- read_csv("../data/GenericPolls.csv") 
 
@@ -107,33 +108,31 @@ c((summary(fit1))$adj.r.squared, (summary(fit2))$adj.r.squared,
 
 They all have about the same adjusted $R^2$ except for the 2nd model. This makes sense if we believe likely voter polls to be unbiased, because we regressed to find the shift size that results in registered voter polls that reflect likely voter populations, then fixed the intercept to claim the resulting polls we unbiased.
 
-Now we calculate the mean Democratic share on the congressional ballot in 2018. Fivethirtyeight's dataset is online, and they use a much more sophisticated weighting and adjustment process to account for house effects. In the age of robotic polls this is becoming incredibly important. A few polling houses can dominate the averages by pumping out dozens of polls, all of which may be biased in the same way. 
+Now we calculate the mean Democratic share on the congressional ballot in 2018. Fivethirtyeight's dataset is online, but I limit myself to only using live telephone polls, excluding all polls taken online, robotically, or by IVR (Interactive Voice Response). I do this to match Bafumi et al's methodology, not because they (or I) believe that these polls are more reliable, but to ensure consistency: the generic ballot share for earlier elections being regressed on sometimes reflect a single poll conducted by Gallup. Trying to compare that to the huge body of polls produced every day would invoke consistency probelms, so we limit ourselves to the 6 live polls conducted in the valid timeframe in 2018. 
 
 <<2018 generic ballot, include=FALSE>>=
-generic_polllist <- read_csv("~/generic_polllist.csv", 
-                             col_types = cols(enddate = col_date(format = "%m/%d/%Y"), 
-                                              startdate = col_date(format = "%m/%d/%Y"))) %>%
-  filter(enddate > as.Date("2018-5-10"), enddate < as.Date("2018-7-08")) %>%
+genpolls <- read_csv("../data/genpolls2018.csv") %>%
   mutate(dem_share = dem/(dem+rep) * 100 - 50, 
          adj_dem_share = adjusted_dem/(adjusted_rep+adjusted_dem) * 100 - 50,
          is_rv = population == "rv" | population == "a") 
 
-genpoll2018 <- sum(generic_polllist$adj_dem_share * generic_polllist$weight) / 
-               sum(generic_polllist$weight)
-params18 <- data.frame(adj_genpoll=genpoll2018, president_party=-1, genpoll=genpoll2018)
+#genpoll2018 <- sum(genpolls$adj_dem_share * genpolls$weight) / 
+#               sum(genpolls$weight)
+genpoll2018 <- mean(genpolls$adj_dem_share) - 1.277
+params18 <- data.frame(adj_genpoll=genpoll2018, president_party=-1, genpoll=genpoll2018+1.277)
 @
 
 <<>>=
 genpoll2018
 @
 
-Thus we claim that Democrats have on average 54\% of generic ballot respondents' support. With this average, we create a prediction interval for 2018's democratic national vote share:
+Thus we claim that Democrats have on average 53.2\% of generic ballot respondents' support, once transformed to match likely voter populations. With this average, we create a prediction interval for 2018's democratic national vote share:
 
 <<prediction interval>>=
 predict.lm(fit2, params18, interval = "prediction")
 @
 
-Thus I predict that Democrats will win 53.92\% of the popular vote. Further, I am 95\% confident that the Democrats will win between 50.11\% and 57.73\% of the vote.
+Thus I predict that Democrats will win 53.6\% of the popular vote. Further, I am 95\% confident that the Democrats will win between 48.8\% and 57.4\% of the vote.
 
 At this point it's worth noting how important the decisions we made before were. Consider using one of the other models:
 
@@ -148,7 +147,7 @@ interval4 <- predict.lm(fit4, params18, se.fit = TRUE, interval="prediction")
 c(interval1$fit[1], interval$fit[1], interval3$fit[1], interval4$fit[1])
 @
 
-These are the point estimates for the national vote based on the four models used. It's worth acknowledging that the one I chose is the most friendly to Democrats, and that these two choices outlined could result in a different prediction of 1\% of all voters in the country, a large margin that will have a significant effect on predictions.
+These are the point estimates for the national vote based on the four models used. It's worth acknowledging that the difference between choices could result in a different prediction of 0.8\% of all voters in the country, a large margin that will have a non-negligible effect on predictions.
 
 <<standard error, include=FALSE>>=
 t.cuttoff <- qt(0.975, df=16)
@@ -161,7 +160,7 @@ interval$df
 se
 @
 
-Mathematically, I am saying that the democratic share of the two-party vote, measured in percentage points away from 50, is distributed t(3.92, 1.80, df=16). This gives us our prediction interval that we are 95\% confident the value will be between 0.11 and 7.73. This means I am all but certain the Democrats will win the national house vote. 
+Mathematically, I am saying that the democratic share of the two-party vote, measured in percentage points away from 50, is distributed t(3.57, 1.79, df=16). This gives us our prediction interval that we are 95\% confident the value will be between -0.2 and 7.37. This means I am all but certain the Democrats will win the national house vote. 
 
 The 2016 popular vote was:
 
@@ -171,10 +170,10 @@ dem_share16
 
 Thus if we measure 2016-2018 national vote swing, we get points estimate and prediction interval:
 <<>>=
-interval - dem_share16
+interval$fit - dem_share16
 @
 
-Mathematically, we say that the swing in national democratic share of two-party vote is distributed t(4.476, 1.79, df=15) with the prediction interval shown above.
+Mathematically, we say that the swing in national democratic share of two-party vote is distributed t(4.1, 1.8, df=15) with the prediction interval shown above.
 
 <<swing params, include=FALSE>>=
 c(interval1$fit[1], interval$fit[1], interval3$fit[1], interval4$fit[1]) - dem_share16
@@ -606,7 +605,7 @@ We calculate the probability of a blue house:
 sum(posterior$dseats > 217) / nrow(posterior)
 @
 
-About a two-thirds chance of Democrats winning the house in November!
+According to this, the probability of Democrats taking the house in 2018 is just better than a coin flip.
 
 <<making the dataset, include=FALSE>>=
 dem_win_pct <- ((colSums(posterior > 0)/nrow(posterior)) %>% head(-3))[-c(1:368)] * 100

@@ -36,8 +36,8 @@ parse_param <- function(flag_set, flag_str, default) {
 # set expectations and variances
 sdopen <- parse_param(set_sd_open, "stdev-open", 6.133)
 sdinc <- parse_param(set_sd_inc, "stdev-inc", 4.053)
-expswing <- parse_param(set_exp_swing, "expected-swing", 4.476) 
-sdswing <- parse_param(set_sd_swing, "stdev-swing", 1.797) 
+expswing <- parse_param(set_exp_swing, "expected-swing", 4.129) 
+sdswing <- parse_param(set_sd_swing, "stdev-swing", 1.792) 
 dfswing <- 16
 
 if ((no_adjust | no_fix_int) & set_exp_swing) {
@@ -46,12 +46,12 @@ if ((no_adjust | no_fix_int) & set_exp_swing) {
 
 if (no_adjust & no_fix_int) {
   dfswing <- 15
-  expswing <- 3.422 
+  expswing <- 3.660 
 } else if (no_adjust) {
-  expswing <- 4.269
+  expswing <- 4.448
 } else if (no_fix_int) {
   dfswing <- 15
-  expswing <- 4.055
+  expswing <- 3.657
 }
 
 # alternate defaults for other template

@@ -1,0 +1,8 @@
+startdate,enddate,pollster,population,weight,dem,rep,adjusted_dem,adjusted_rep,url
+5/29/18,6/5/18,IBD/TIPP,rv,1.547826,47,40,46.82906,39.9014,https://www.investors.com/politics/trump-job-approval-economy-korea-favorability-ibd-tipp-poll/
+6/1/18,6/4/18,NBC News/Wall Street Journal,rv,1.472228,50,40,48.9086,38.98218,https://www.wsj.com/public/resources/documents/18416NBCWSJJunePoll060718Release.pdf
+6/1/18,6/5/18,Greenberg Quinlan Rosner,rv,1.438702,51,42,49.85759,40.78112,http://www.democracycorps.com/attachments/article/1085/Toplines_Dcorps-AFT%20June%20National%20Web-Survey.pdf
+6/3/18,6/6/18,Fox News,rv,1.804042,48,39,47.90444,39.12195,http://www.foxnews.com/politics/interactive/2018/06/07/fox-news-poll-67.html
+6/11/18,6/17/18,Gallup,rv,1.530154,48,43,47.6057,41.91739,https://news.gallup.com/poll/235835/americans-certainty-voting-year-starting-low.aspx
+6/14/18,6/17/18,CNN/SSRS,rv,1.509748,50,42,47.25312,40.59647,http://cdn.cnn.com/cnn/2018/images/06/19/rel6d.-.2018.election.pdf
+6/21/18,6/29/18,IBD/TIPP,rv,1.361252,48,40,47.82906,39.9014,https://www.investors.com/wp-content/uploads/2018/07/IBDTIPP_2018_07.pdf
