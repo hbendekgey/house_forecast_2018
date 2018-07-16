@@ -16,7 +16,7 @@ options(digits=4)
 @
 
 
-Alan Abramowitz proposes a simple structuralist model for house and senate prediction. To predict the net change in Republican-held seats in a midterm election year, we need three pieces of information: which party currently holds the Presidency, the generic ballot margin in early September, and the number of seats Republicans currently hold. 
+Professor Alan Abramowitz proposes a simple structuralist model for house and senate prediction. To predict the net change in Republican-held seats in a midterm election year, we need three pieces of information: which party currently holds the Presidency, the generic ballot margin in early September, and the number of seats Republicans currently hold. 
 
 Each one of these predictors is heavily rooted in theory. That incumbents lose seats during the midterms is a well-established phenomenon; in fact, 1998 and 2002 were the only midterm election years since World War 2 where the incumbent party did not lose seats in the house. Using the currently held number of seats is a kind of exposure model, which observes that parties with more to lose are likely to lose. Finally, the generic ballot margin in August and September is a reflection of voter sentiment, which directly impacts seat swing.  
 

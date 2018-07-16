@@ -14,6 +14,9 @@ Column Name | Explanation
 `incumbent18` | -1 if a Republican incumbent is running in 2018, 1 if a Democratic incumbent is running, 0 otherwise. Pennsylvania is treated to have no incumbents due to redistricting
 `concede` | 1 if race should be automatically assumed Democratic win according to Bafumi et al's model, -1 if it should be automatically assumed to be a Republican win. 
 
+### genpolls2018.csv
+Collected from [Fivethirtyeight's Generic Ballot Records](https://github.com/fivethirtyeight/data/tree/master/congress-generic-ballot). Contains all 7 polls conducted between 180 and 121 days before the election which were conducted via live phone interview (i.e. not robotically or online)
+
 ### presresults.csv
 [Data obtained from DailyKos](https://docs.google.com/spreadsheets/d/1VfkHtzBTP5gf4jAu8tcVQgsBJ1IDvXEHjuMqYlOgYbA) reformatted by me. Contains Presidential election results 2008-2016 by congressional district.
 
@@ -35,6 +38,8 @@ Column Name | Explanation
 `midterm` | -1  if Democrat in white house, 1 if Republican in white house. 
 `nat_vote_dem` | percentage of national house vote that went to Democrats that year
 `nat_vote_rep` | percentage of national house vote that went to Republicans that year
+`rsen_exposure` | number of Republican senate seats up to election minus the number of Democratic seats up
+`chrseats_sen` | change in Republican seats due to this election
 
 Note that the convention for the `midterm` variable is opposite of how it appears elsewhere, because this dataset was created to be used with Abramowitz's model.
 
