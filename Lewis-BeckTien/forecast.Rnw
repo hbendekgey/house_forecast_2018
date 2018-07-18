@@ -130,12 +130,12 @@ ggplot(sxpred, aes(x=pred,y=actual)) + geom_point() +
   scale_y_continuous(limits=c(-70,30)) + geom_abline(slope=1,intercept=0)
 @
 
-We notice that the predictions seem to be systematically biased in favor of incumbents, having overestimated incumbent performance for every single election since 2006. The size of this bias is on average 7.5 seats. If we make this adjustment, calculate standard error, and produce a distribution of seats, we see: 
+We notice that the predictions seem to be systematically biased in favor of incumbents, having overestimated incumbent performance for every single election since 2006. The size of this bias is on average 7.5 seats. We might feel tempted to make this shift, and thereby decrease the residuals. But with only 6 data points, it's dangerous to overfit the data and pretend that demostrates a great deal of confidence. If we ignore this adjustment, calculate standard error, and produce a distribution of seats, we see: 
 
 <<include=FALSE>>=
 lm(actual ~ offset(1 *pred), data=sxpred) %>% summary()
-sigma <- (lm(actual ~ offset(1 *pred), data=sxpred) %>% summary())$sigma
-mu <- (interval$fit[1] - 59)/2 -7.545
+sigma <- (lm(actual ~ 0 + offset(1 *pred), data=sxpred) %>% summary())$sigma
+mu <- (interval$fit[1] - 59)/2
 @
 
 <<>>=
@@ -151,13 +151,13 @@ ggplot(aes(x=dseats, fill=(dseats > 217)), data=forecast_df) +
 
 This is a very different picture. The reason for this is Rothenberg's seats-in-play differential of -59, almost as big as 2006's. That year, Rothenberg predicted the swing much better than the structural model, but in 2018, it predicted a huge swing of 48 and saw only 6 seats swing. It's important to be careful who you trust, and decide for yourself if pundits are doing better in 2018 than in 2016.
 
-Adding the X-part of the Structure-X model pulls the seat change further towards Democrats and reduces the standard erorr, causing a great deal of confidence. The maximum error of the adjusted Structure-X model in the past 6 elections is 10 seats.
+Adding the X-part of the Structure-X model pulls the seat change further towards Democrats and by becoming a better predictor reduces the standard erorr, causing a great deal of confidence.
 
 <<>>=
 mu
 mean(dseats > 217)
 @
 
-Thus we predict Republicans will lose 52 seats, and estimate a 99.7\% chance of Democrats taking the house.
+Thus we predict Republicans will lose 45 seats, and estimate a 97\% chance of Democrats taking the house.
 
 \end{document}
