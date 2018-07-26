@@ -130,7 +130,7 @@ ggplot(sxpred, aes(x=pred,y=actual)) + geom_point() +
   scale_y_continuous(limits=c(-70,30)) + geom_abline(slope=1,intercept=0)
 @
 
-We notice that the predictions seem to be systematically biased in favor of incumbents, having overestimated incumbent performance for every single election since 2006. The size of this bias is on average 7.5 seats. We might feel tempted to make this shift, and thereby decrease the residuals. But with only 6 data points, it's dangerous to overfit the data and pretend that demostrates a great deal of confidence. If we ignore this adjustment, calculate standard error, and produce a distribution of seats, we see: 
+We notice that the predictions seem to be systematically biased in favor of incumbents, having overestimated incumbent performance for every single election since 2006. The size of this bias is on average 7 seats. We might feel tempted to make this shift, and thereby decrease the residuals. But with only 6 data points, it's dangerous to overfit the data and pretend that demostrates a great deal of confidence. If we ignore this adjustment, calculate standard error, and produce a distribution of seats, we see: 
 
 <<include=FALSE>>=
 lm(actual ~ offset(1 *pred), data=sxpred) %>% summary()
