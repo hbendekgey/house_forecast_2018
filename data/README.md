@@ -43,5 +43,13 @@ Column Name | Explanation
 
 Note that the convention for the `midterm` variable is opposite of how it appears elsewhere, because this dataset was created to be used with Abramowitz's model.
 
+### structurex.csv
+Compiled by me.
 
+Column Name | Explanation
+------------- | -------------
+`year` | Year of election
+`chiseats` | change in incumbent (defined by who controls the Presidency) seats due to this election
+`midterm` | 0  if Presidential election, 1 if midterm election. 
+`rdi_growth` | percent growth in real disposible income from December the year before the election to June of election year
 
